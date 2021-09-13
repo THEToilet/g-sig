@@ -4,12 +4,19 @@ import (
 	"flag"
 	"fmt"
 	"g-sig/pkg/config"
+	"g-sig/pkg/domain/application"
+	logger2 "g-sig/pkg/logger"
+	"g-sig/pkg/server"
+	"github.com/rs/zerolog"
 	"io/ioutil"
 	"log"
 	"os"
 )
 
-var version = "0.1.0"
+var (
+	version = "0.1.0"
+	logger *zerolog.Logger
+	)
 
 func init() {
 
@@ -24,6 +31,12 @@ func init() {
 	}
 
 	config := config.NewConfig(buffer)
+	fmt.Println(config)
+
+	logger, err = logger2.NewLogger()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -34,5 +47,14 @@ func main() {
 		fmt.Printf("g-sig version is %s", version)
 		return
 	}
+
+	// UseCase
+	signalingUseCase := application.NewSignalingUseCase(logger)
+
+	server := server.NewServer(signalingUseCase, logger)
+	if err := server.ListenAndServe(); err != nil {
+		logger.Fatal().Err(err)
+	}
+	logger.Info().Msg("Serve is running")
 
 }

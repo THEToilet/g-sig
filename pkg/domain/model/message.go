@@ -1,33 +1,33 @@
 package model
 
-type message struct {
+type Message struct {
 	Type string `json:"type"`
 }
 
-type registerMessage struct {
+type RegisterMessage struct {
 	Type string `json:"type"`
 	User user `json:"user"`
 	UserInfo userInfo `json:"userInfo"`
 }
 
-type updateMessage struct {
+type UpdateMessage struct {
 	Type string `json:"type"`
 	UserInfo userInfo `json:"userInfo"`
 }
 
-type searchMessage struct {
+type SearchMessage struct {
 	Type string `json:"type"`
 	UserInfo userInfo `json:"userInfo"`
 	SearchType string `json:"searchType"`
 	SearchDistance float64 `json:"searchDistance"`
 }
 
-type deleteMessage struct {
+type DeleteMessage struct {
 	Type string `json:"type"`
 	UserInfo userInfo `json:"userInfo"`
 }
 
-type sendMessage struct {
+type SendMessage struct {
 	Type string `json:"type"`
 	Message string `json:"message"`
 }
