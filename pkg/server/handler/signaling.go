@@ -36,12 +36,69 @@ func (h *signalingHandler)Signaling(writer http.ResponseWriter, request *http.Re
 			if err != nil {
 				return
 			}
+			h.logger.Info().Msg(string(msg))
+
 			message := &model.Message{}
-			err := json.Unmarshal(msg, &message);
-			if err != nil {
+			if err := json.Unmarshal(msg, &message); err != nil{
 				h.logger.Fatal().Err(err)
 			}
-			h.logger.Info().Msg(string(msg))
+			if message == nil {
+				h.logger.Fatal()
+			}
+			switch message.Type {
+			case "register":
+				// userInfo登録
+				registerMessage := &model.RegisterMessage{}
+				if err := json.Unmarshal(msg, &registerMessage); err != nil{
+					h.logger.Fatal().Err(err)
+				}
+				h.logger.Info().Msg("register")
+				break
+			case "update":
+				// userInfo更新
+				updateMessage := &model.UpdateMessage{}
+				if err := json.Unmarshal(msg, &updateMessage); err != nil{
+					h.logger.Fatal().Err(err)
+				}
+				h.logger.Info().Msg("update")
+				break
+			case "delete":
+				// userInfo削除
+				deleteMessage := &model.DeleteMessage{}
+				if err := json.Unmarshal(msg, &deleteMessage); err != nil{
+					h.logger.Fatal().Err(err)
+				}
+				h.logger.Info().Msg("delete")
+				break
+			case "search":
+				// 周囲端末検索
+				searchMessage := &model.SearchMessage{}
+				if err := json.Unmarshal(msg, &searchMessage); err != nil{
+					h.logger.Fatal().Err(err)
+				}
+				h.logger.Info().Msg("search")
+				switch searchMessage.SearchType {
+				case "static":
+					break
+				case "dynamic":
+					break
+				default:
+					break
+				}
+				break
+			case "send":
+				// 周囲に一斉送信
+				sendMessage := &model.SendMessage{}
+				if err := json.Unmarshal(msg, &sendMessage); err != nil{
+					h.logger.Fatal().Err(err)
+				}
+				h.logger.Info().Msg("send")
+				break
+			default:
+				h.logger.Info().Msg("invalid message")
+				break
+			}
+
 			err = wsutil.WriteServerMessage(conn, op, msg)
 			if err != nil {
 				return
