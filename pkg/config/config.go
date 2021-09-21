@@ -6,14 +6,14 @@ import (
 )
 
 type config struct {
-	Title 	string
-	Server 	map[string]server
+	Title   string
+	Server  map[string]server
 	LogInfo logInfo
 }
 
 type server struct {
-	ServerAddress 	string 	`toml:"server_address"`
-	ServerPort 		uint 	`toml:"server_port"`
+	ServerAddress string `toml:"server_address"`
+	ServerPort    uint   `toml:"server_port"`
 }
 
 type logInfo struct {
@@ -21,7 +21,7 @@ type logInfo struct {
 
 func NewConfig(buffer []byte) *config {
 	var conf config
-	if err := toml.Unmarshal(buffer, &conf); err != nil{
+	if err := toml.Unmarshal(buffer, &conf); err != nil {
 		log.Fatal(err)
 	}
 	return &conf

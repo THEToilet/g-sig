@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func NewLogger() (*zerolog.Logger, error){
+func NewLogger() (*zerolog.Logger, error) {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	//logger := zerolog.New(os.Stdout).With().Timestamp().Logger().Level(zerolog.DebugLevel)
 	// To logger a human-friendly, colorized output, use zerolog.ConsoleWriter:

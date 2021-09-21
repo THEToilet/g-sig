@@ -8,14 +8,14 @@ import (
 	"net/http"
 )
 
-func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *http.Server{
+func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *http.Server {
 	mux := http.NewServeMux()
 	//mux.Handle("/signup", )
 	logger.Info().Msg("HELLO")
 	signalingHandler := handler.NewSignalingHandler(signalingUseCase, logger)
 
 	mux.HandleFunc("/signaling", signalingHandler.Signaling)
-	mux.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request){
+	mux.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(writer, "HELLOOOOOOO")
 		logger.Info().Msg(" / Access is Successful")
 	})

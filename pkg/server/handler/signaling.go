@@ -12,19 +12,19 @@ import (
 
 type signalingHandler struct {
 	signalingUseCase *application.SignalingUseCase
-	logger *zerolog.Logger
+	logger           *zerolog.Logger
 }
 
 func NewSignalingHandler(useCase *application.SignalingUseCase, logger *zerolog.Logger) *signalingHandler {
 	return &signalingHandler{
 		signalingUseCase: useCase,
-		logger: logger,
+		logger:           logger,
 	}
 }
 
-func (h *signalingHandler)Signaling(writer http.ResponseWriter, request *http.Request){
+func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.Request) {
 	conn, _, _, err := ws.UpgradeHTTP(request, writer)
-	if err != nil{
+	if err != nil {
 		h.logger.Fatal().Err(err)
 		return
 	}
@@ -39,64 +39,63 @@ func (h *signalingHandler)Signaling(writer http.ResponseWriter, request *http.Re
 			h.logger.Info().Msg(string(msg))
 
 			message := &model.Message{}
-			if err := json.Unmarshal(msg, &message); err != nil{
+			if err := json.Unmarshal(msg, &message); err != nil {
 				h.logger.Fatal().Err(err)
 			}
 			if message == nil {
 				h.logger.Fatal()
 			}
+
 			switch message.Type {
 			case "register":
 				// userInfo登録
 				registerMessage := &model.RegisterMessage{}
-				if err := json.Unmarshal(msg, &registerMessage); err != nil{
+				if err := json.Unmarshal(msg, &registerMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("register")
-				break
+				h.signalingUseCase.Register()
 			case "update":
 				// userInfo更新
 				updateMessage := &model.UpdateMessage{}
-				if err := json.Unmarshal(msg, &updateMessage); err != nil{
+				if err := json.Unmarshal(msg, &updateMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("update")
-				break
+				h.signalingUseCase.Update()
 			case "delete":
 				// userInfo削除
 				deleteMessage := &model.DeleteMessage{}
-				if err := json.Unmarshal(msg, &deleteMessage); err != nil{
+				if err := json.Unmarshal(msg, &deleteMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("delete")
-				break
+				h.signalingUseCase.Delete()
 			case "search":
 				// 周囲端末検索
 				searchMessage := &model.SearchMessage{}
-				if err := json.Unmarshal(msg, &searchMessage); err != nil{
+				if err := json.Unmarshal(msg, &searchMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("search")
 				switch searchMessage.SearchType {
 				case "static":
-					break
+					h.signalingUseCase.StaticSearch()
 				case "dynamic":
-					break
+					h.signalingUseCase.DynamicSearch()
 				default:
-					break
+					h.logger.Info().Msg("invalid type")
 				}
-				break
 			case "send":
 				// 周囲に一斉送信
 				sendMessage := &model.SendMessage{}
-				if err := json.Unmarshal(msg, &sendMessage); err != nil{
+				if err := json.Unmarshal(msg, &sendMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("send")
-				break
+				h.signalingUseCase.Send()
 			default:
 				h.logger.Info().Msg("invalid message")
-				break
 			}
 
 			err = wsutil.WriteServerMessage(conn, op, msg)

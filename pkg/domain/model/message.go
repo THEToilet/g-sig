@@ -5,29 +5,29 @@ type Message struct {
 }
 
 type RegisterMessage struct {
-	Type string `json:"type"`
-	User user `json:"user"`
-	UserInfo userInfo `json:"userInfo"`
+	Type     string   `json:"type"`
+	User     User     `json:"user"`
+	UserInfo UserInfo `json:"userInfo"`
 }
 
 type UpdateMessage struct {
-	Type string `json:"type"`
-	UserInfo userInfo `json:"userInfo"`
+	Type     string   `json:"type"`
+	UserInfo UserInfo `json:"userInfo"`
 }
 
 type SearchMessage struct {
-	Type string `json:"type"`
-	UserInfo userInfo `json:"userInfo"`
-	SearchType string `json:"searchType"`
-	SearchDistance float64 `json:"searchDistance"`
+	Type           string   `json:"type"`
+	UserInfo       UserInfo `json:"userInfo"`
+	SearchType     string   `json:"searchType"`
+	SearchDistance float64  `json:"searchDistance"`
 }
 
 type DeleteMessage struct {
-	Type string `json:"type"`
-	UserInfo userInfo `json:"userInfo"`
+	Type     string   `json:"type"`
+	UserInfo UserInfo `json:"userInfo"`
 }
 
 type SendMessage struct {
-	Type string `json:"type"`
+	Type    string `json:"type"`
 	Message string `json:"message"`
 }

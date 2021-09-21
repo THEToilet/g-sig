@@ -1,13 +1,43 @@
 package application
 
-import "github.com/rs/zerolog"
+import (
+	"g-sig/pkg/domain/repository"
+	"github.com/rs/zerolog"
+)
 
 type SignalingUseCase struct {
-	logger *zerolog.Logger
+	userRepository     repository.UserRepository
+	userInfoRepository repository.UserInfoRepository
+	logger             *zerolog.Logger
 }
 
-func NewSignalingUseCase(logger *zerolog.Logger) *SignalingUseCase{
+func NewSignalingUseCase(userRepository repository.UserRepository, userInfoRepository repository.UserInfoRepository, logger *zerolog.Logger) *SignalingUseCase {
 	return &SignalingUseCase{
-		logger: logger,
+		userRepository:     userRepository,
+		userInfoRepository: userInfoRepository,
+		logger:             logger,
 	}
+}
+
+func (s *SignalingUseCase) Register() {
+	s.userInfoRepository.Save()
+}
+
+func (s *SignalingUseCase) Update() {
+	s.userInfoRepository.Update()
+}
+
+func (s *SignalingUseCase) Delete() {
+	s.userInfoRepository.Delete()
+}
+
+func (s *SignalingUseCase) StaticSearch() {
+	userInfoList, err :=  s.userInfoRepository.FindAll()
+}
+
+func (s *SignalingUseCase) DynamicSearch() {
+	userInfoList, err :=  s.userInfoRepository.FindAll()
+}
+
+func (s *SignalingUseCase) Send() {
 }

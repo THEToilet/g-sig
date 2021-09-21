@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"g-sig/pkg/config"
 	"g-sig/pkg/domain/application"
+	"g-sig/pkg/gateway/repository"
 	logger2 "g-sig/pkg/logger"
 	"g-sig/pkg/server"
 	"github.com/rs/zerolog"
@@ -15,8 +16,8 @@ import (
 
 var (
 	version = "0.1.0"
-	logger *zerolog.Logger
-	)
+	logger  *zerolog.Logger
+)
 
 func init() {
 
@@ -48,8 +49,12 @@ func main() {
 		return
 	}
 
+	// Repository
+	userRepository := repository.NewUserRepository(logger)
+	userInfoRepository := repository.NewUserInfoRepository(logger)
+
 	// UseCase
-	signalingUseCase := application.NewSignalingUseCase(logger)
+	signalingUseCase := application.NewSignalingUseCase(userRepository, userInfoRepository, logger)
 
 	server := server.NewServer(signalingUseCase, logger)
 	if err := server.ListenAndServe(); err != nil {
