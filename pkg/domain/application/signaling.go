@@ -3,8 +3,8 @@ package application
 import (
 	"g-sig/pkg/domain/model"
 	"g-sig/pkg/domain/repository"
-	"github.com/rs/zerolog"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 )
 
 type SignalingUseCase struct {
@@ -27,6 +27,7 @@ func (s *SignalingUseCase) Register(userInfo model.UserInfo) error {
 		return err
 	}
 	user := model.NewUserInfo(userID.String(), userInfo.PrivateIP, userInfo.PrivatePort, userInfo.PublicIP, userInfo.PublicPort, userInfo.Latitude, userInfo.Longitude)
+	s.logger.Info().Msg(userID.String())
 	return s.userInfoRepository.Save(*user)
 }
 

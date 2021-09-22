@@ -1,14 +1,14 @@
 package model
 
-// userInfo ユーザの頻繁に変わる情報
+// UserInfo ユーザの頻繁に変わる情報
 type UserInfo struct {
-	UserID      string
-	PublicIP    string
-	PublicPort  uint8
-	PrivateIP   string
-	PrivatePort uint8
-	Latitude    float64
-	Longitude   float64
+	UserID      string   `json:"userID"`
+	PublicIP    string   `json:"publicIP"`
+	PublicPort  uint8    `json:"publicPort"`
+	PrivateIP   string   `json:"privateIP"`
+	PrivatePort uint8    `json:"privatePort"`
+	Latitude    float64  `json:"latitude"`
+	Longitude   float64  `json:"longitude"`
 }
 
 // NewUserInfo 新しいUserInfoを生成したポインタを返す

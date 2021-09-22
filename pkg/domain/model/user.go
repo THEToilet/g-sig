@@ -1,6 +1,6 @@
 package model
 
-// user 永続化するユーザ情報
+// User 永続化するユーザ情報
 type User struct {
 	UserID   string
 	UserName string
