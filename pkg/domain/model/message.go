@@ -6,7 +6,6 @@ type Message struct {
 
 type RegisterMessage struct {
 	Type     string   `json:"type"`
-	User     User     `json:"user"`
 	UserInfo UserInfo `json:"userInfo"`
 }
 

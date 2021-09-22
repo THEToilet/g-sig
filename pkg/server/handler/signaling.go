@@ -48,45 +48,55 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 
 			switch message.Type {
 			case "register":
+
 				// userInfo登録
 				registerMessage := &model.RegisterMessage{}
 				if err := json.Unmarshal(msg, &registerMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("register")
-				h.signalingUseCase.Register()
+				h.signalingUseCase.Register(registerMessage.UserInfo)
+
 			case "update":
+
 				// userInfo更新
 				updateMessage := &model.UpdateMessage{}
 				if err := json.Unmarshal(msg, &updateMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("update")
-				h.signalingUseCase.Update()
+				h.signalingUseCase.Update(updateMessage.UserInfo)
+
 			case "delete":
+
 				// userInfo削除
 				deleteMessage := &model.DeleteMessage{}
 				if err := json.Unmarshal(msg, &deleteMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("delete")
-				h.signalingUseCase.Delete()
+				h.signalingUseCase.Delete(deleteMessage.UserInfo)
+
 			case "search":
+
 				// 周囲端末検索
 				searchMessage := &model.SearchMessage{}
 				if err := json.Unmarshal(msg, &searchMessage); err != nil {
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("search")
+
 				switch searchMessage.SearchType {
 				case "static":
-					h.signalingUseCase.StaticSearch()
+					h.signalingUseCase.StaticSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
 				case "dynamic":
-					h.signalingUseCase.DynamicSearch()
+					h.signalingUseCase.DynamicSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
 				default:
 					h.logger.Info().Msg("invalid type")
 				}
+
 			case "send":
+
 				// 周囲に一斉送信
 				sendMessage := &model.SendMessage{}
 				if err := json.Unmarshal(msg, &sendMessage); err != nil {
@@ -94,13 +104,15 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				}
 				h.logger.Info().Msg("send")
 				h.signalingUseCase.Send()
+
 			default:
 				h.logger.Info().Msg("invalid message")
 			}
 
+			// ここでステータスコードを返す?
 			err = wsutil.WriteServerMessage(conn, op, msg)
 			if err != nil {
-				return
+				h.logger.Fatal().Err(err)
 			}
 		}
 	}()
