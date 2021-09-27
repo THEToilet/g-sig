@@ -5,6 +5,7 @@ import "g-sig/pkg/domain/model"
 type Status struct {
 	Code string `json:"code"`
 	Message string `json:"message"`
+	Type string `json:"type"`
 }
 
 type SearchResponse struct {

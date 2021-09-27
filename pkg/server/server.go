@@ -19,6 +19,15 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 		fmt.Fprintf(writer, "HELLOOOOOOO")
 		logger.Info().Msg(" / Access is Successful")
 	})
+	mux.HandleFunc("/stun", func(writer http.ResponseWriter, r *http.Request) {
+		writer.Header().Set("Access-Control-Allow-Headers", "*")
+		writer.Header().Set("Access-Control-Allow-Origin", "*")
+		writer.Header().Set( "Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS" )
+		fmt.Fprintf(writer, "stun:")
+		logger.Info().Msg(r.RemoteAddr)
+		fmt.Fprintf(writer, r.RemoteAddr)
+		logger.Info().Msg(" /stun Access is Successful")
+	})
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
 		Handler:           mux,

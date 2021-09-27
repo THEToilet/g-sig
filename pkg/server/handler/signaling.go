@@ -63,6 +63,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				status := message2.Status{
 					Code:    "200",
 					Message: "OK",
+					Type:    "register",
 				}
 				responseMessage, err = json.Marshal(status)
 				if err != nil {
@@ -82,6 +83,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				status := message2.Status{
 					Code:    "200",
 					Message: "OK",
+					Type:    "update",
 				}
 				responseMessage, err = json.Marshal(status)
 				if err != nil {
@@ -101,6 +103,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				status := message2.Status{
 					Code:    "200",
 					Message: "OK",
+					Type:    "delete",
 				}
 				responseMessage, err = json.Marshal(status)
 				if err != nil {
@@ -130,6 +133,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				status := message2.Status{
 					Code:    "200",
 					Message: "OK",
+					Type:    "search",
 				}
 				tmp := message2.SearchResponse{
 					Status:           status,
