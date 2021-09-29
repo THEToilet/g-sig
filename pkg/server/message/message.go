@@ -12,3 +12,7 @@ type SearchResponse struct {
 	Status Status `json:"status"`
 	SearchedUserList []*model.UserInfo `json:"searchedUserList"`
 }
+type RegisterResponse struct {
+	Status Status `json:"status"`
+	UserID string `json:"userID"`
+}

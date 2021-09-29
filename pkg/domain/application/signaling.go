@@ -21,14 +21,14 @@ func NewSignalingUseCase(userRepository repository.UserRepository, userInfoRepos
 	}
 }
 
-func (s *SignalingUseCase) Register(userInfo model.UserInfo) error {
+func (s *SignalingUseCase) Register(userInfo model.UserInfo) (string, error) {
 	userID, err := uuid.NewUUID()
 	if err != nil {
-		return err
+		return "", err
 	}
 	user := model.NewUserInfo(userID.String(), userInfo.PrivateIP, userInfo.PrivatePort, userInfo.PublicIP, userInfo.PublicPort, userInfo.Latitude, userInfo.Longitude)
 	s.logger.Info().Msg(userID.String())
-	return s.userInfoRepository.Save(*user)
+	return userID.String(), s.userInfoRepository.Save(*user)
 }
 
 func (s *SignalingUseCase) Update(userInfo model.UserInfo) error {
@@ -39,14 +39,14 @@ func (s *SignalingUseCase) Delete(userInfo model.UserInfo) error {
 	return s.userInfoRepository.Delete(userInfo.UserID)
 }
 
-func (s *SignalingUseCase) StaticSearch(userInfo model.UserInfo, searchDistance float64) ([]*model.UserInfo, error){
-	userInfoList, err :=  s.userInfoRepository.FindAll()
+func (s *SignalingUseCase) StaticSearch(userInfo model.UserInfo, searchDistance float64) ([]*model.UserInfo, error) {
+	userInfoList, err := s.userInfoRepository.FindAll()
 	if err != nil {
 		return nil, err
 	}
 	var searchedUserList []*model.UserInfo
-	for _, v  := range userInfoList {
-		if ((userInfo.Latitude - v.Latitude) * (userInfo.Latitude - v.Latitude) + ((userInfo.Longitude- v.Longitude) * (userInfo.Longitude - v.Longitude))) <= searchDistance*searchDistance {
+	for _, v := range userInfoList {
+		if ((userInfo.Latitude-v.Latitude)*(userInfo.Latitude-v.Latitude) + ((userInfo.Longitude - v.Longitude) * (userInfo.Longitude - v.Longitude))) <= searchDistance*searchDistance {
 			if v.UserID != userInfo.UserID {
 				searchedUserList = append(searchedUserList, v)
 			}
@@ -55,8 +55,8 @@ func (s *SignalingUseCase) StaticSearch(userInfo model.UserInfo, searchDistance 
 	return searchedUserList, err
 }
 
-func (s *SignalingUseCase) DynamicSearch(userInfo model.UserInfo, searchDistance float64) ([]*model.UserInfo, error){
-	userInfoList, err :=  s.userInfoRepository.FindAll()
+func (s *SignalingUseCase) DynamicSearch(userInfo model.UserInfo, searchDistance float64) ([]*model.UserInfo, error) {
+	userInfoList, err := s.userInfoRepository.FindAll()
 	if err != nil {
 		return nil, err
 	}

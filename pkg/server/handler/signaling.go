@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"g-sig/pkg/domain/application"
 	"g-sig/pkg/domain/model"
-	message2 "g-sig/pkg/server/message"
+	response_message "g-sig/pkg/server/message"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/rs/zerolog"
@@ -30,6 +30,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 		return
 	}
 	h.logger.Info().Msg("Connection Start")
+
 	go func() {
 		var responseMessage []byte
 		defer conn.Close()
@@ -58,14 +59,20 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("register")
-				h.signalingUseCase.Register(registerMessage.UserInfo)
 
-				status := message2.Status{
+				userID, err := h.signalingUseCase.Register(registerMessage.UserInfo)
+
+				status := response_message.Status{
 					Code:    "200",
 					Message: "OK",
 					Type:    "register",
 				}
-				responseMessage, err = json.Marshal(status)
+				registerResponse := response_message.RegisterResponse{
+					Status: status,
+					UserID: userID,
+				}
+
+				responseMessage, err = json.Marshal(registerResponse)
 				if err != nil {
 					h.logger.Fatal().Err(err)
 				}
@@ -80,7 +87,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				h.logger.Info().Msg("update")
 				h.signalingUseCase.Update(updateMessage.UserInfo)
 
-				status := message2.Status{
+				status := response_message.Status{
 					Code:    "200",
 					Message: "OK",
 					Type:    "update",
@@ -100,7 +107,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				h.logger.Info().Msg("delete")
 				h.signalingUseCase.Delete(deleteMessage.UserInfo)
 
-				status := message2.Status{
+				status := response_message.Status{
 					Code:    "200",
 					Message: "OK",
 					Type:    "delete",
@@ -130,16 +137,49 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 					h.logger.Info().Msg("invalid type")
 				}
 
-				status := message2.Status{
+				if searchedUserList == nil {
+					searchedUserList = append(searchedUserList, &model.UserInfo{})
+				}
+
+				// Debug
+				searchedUserList = append(searchedUserList, &model.UserInfo{
+					UserID:      "test1",
+					PublicIP:    "",
+					PublicPort:  0,
+					PrivateIP:   "",
+					PrivatePort: 0,
+					Latitude:    35.943207099999995,
+					Longitude:   139.6211672,
+				})
+				searchedUserList = append(searchedUserList, &model.UserInfo{
+					UserID:      "test2",
+					PublicIP:    "",
+					PublicPort:  0,
+					PrivateIP:   "",
+					PrivatePort: 0,
+					Latitude:    35.948658,
+					Longitude:   139.640718,
+				})
+				searchedUserList = append(searchedUserList, &model.UserInfo{
+					UserID:      "test3",
+					PublicIP:    "",
+					PublicPort:  0,
+					PrivateIP:   "",
+					PrivatePort: 0,
+					Latitude:    35.950828,
+					Longitude:   139.651533,
+				})
+
+				status := response_message.Status{
 					Code:    "200",
 					Message: "OK",
 					Type:    "search",
 				}
-				tmp := message2.SearchResponse{
+				searchResponse := response_message.SearchResponse{
 					Status:           status,
 					SearchedUserList: searchedUserList,
 				}
-				responseMessage, err = json.Marshal(tmp)
+				responseMessage, err = json.Marshal(searchResponse)
 				if err != nil {
 					h.logger.Fatal().Err(err)
 				}
@@ -154,11 +194,33 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				h.logger.Info().Msg("send")
 				h.signalingUseCase.Send()
 
+				status := response_message.Status{
+					Code:    "200",
+					Message: "OK",
+					Type:    "send",
+				}
+				responseMessage, err = json.Marshal(status)
+				if err != nil {
+					h.logger.Fatal().Err(err)
+				}
+
 			default:
 				h.logger.Info().Msg("invalid message")
+
+				status := response_message.Status{
+					Code:    "400",
+					Message: "Invalid Message",
+					Type:    "undefined",
+				}
+				responseMessage, err = json.Marshal(status)
+				if err != nil {
+					h.logger.Fatal().Err(err)
+				}
+
 			}
 
 			// ここでステータスコードを返す?
+			h.logger.Info().Msg(string(responseMessage))
 			err = wsutil.WriteServerMessage(conn, op, responseMessage)
 			if err != nil {
 				h.logger.Fatal().Err(err)
