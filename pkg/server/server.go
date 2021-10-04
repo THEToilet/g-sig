@@ -10,8 +10,6 @@ import (
 
 func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *http.Server {
 	mux := http.NewServeMux()
-	//mux.Handle("/signup", )
-	logger.Info().Msg("HELLO")
 	signalingHandler := handler.NewSignalingHandler(signalingUseCase, logger)
 
 	mux.HandleFunc("/signaling", signalingHandler.Signaling)
@@ -22,7 +20,7 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 	mux.HandleFunc("/stun", func(writer http.ResponseWriter, r *http.Request) {
 		writer.Header().Set("Access-Control-Allow-Headers", "*")
 		writer.Header().Set("Access-Control-Allow-Origin", "*")
-		writer.Header().Set( "Access-Control-Allow-Methods","GET, POST, PUT, DELETE, OPTIONS" )
+		writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		fmt.Fprintf(writer, "stun:")
 		logger.Info().Msg(r.RemoteAddr)
 		fmt.Fprintf(writer, r.RemoteAddr)
@@ -32,6 +30,7 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 		Addr:              "127.0.0.1:8080",
 		Handler:           mux,
 		TLSConfig:         nil,
+		// TODO: TimeOutの設定
 		ReadTimeout:       0,
 		ReadHeaderTimeout: 0,
 		WriteTimeout:      0,

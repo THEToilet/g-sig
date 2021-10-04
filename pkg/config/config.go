@@ -5,22 +5,23 @@ import (
 	"log"
 )
 
-type config struct {
+type Config struct {
 	Title   string
-	Server  map[string]server
-	LogInfo logInfo
+	Server  map[string]Server
+	LogInfo LogInfo `toml:"log_info"`
 }
 
-type server struct {
+type Server struct {
 	ServerAddress string `toml:"server_address"`
 	ServerPort    uint   `toml:"server_port"`
 }
 
-type logInfo struct {
+type LogInfo struct {
+	Level string
 }
 
-func NewConfig(buffer []byte) *config {
-	var conf config
+func NewConfig(buffer []byte) *Config {
+	var conf Config
 	if err := toml.Unmarshal(buffer, &conf); err != nil {
 		log.Fatal(err)
 	}

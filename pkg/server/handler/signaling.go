@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"g-sig/pkg/domain/application"
 	"g-sig/pkg/domain/model"
 	response_message "g-sig/pkg/server/message"
@@ -30,6 +32,17 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 		return
 	}
 	h.logger.Info().Msg("Connection Start")
+
+	// コンテキストを使う
+	// タイムアウト処理とかで使える
+	// 今までアクセス時の情報が入ると思ってたけどそういうわけではないらしい
+	// Key：Valueのデータ構造も持つ
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	fmt.Println(cancel)
+
+	// メッセージハンドラーを別のgoroutineにしてもいいかも
+	// タイムアウトの設定もできる
 
 	go func() {
 		var responseMessage []byte
@@ -85,7 +98,10 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("update")
-				h.signalingUseCase.Update(updateMessage.UserInfo)
+				err := h.signalingUseCase.Update(updateMessage.UserInfo)
+				if err != nil {
+					return
+				}
 
 				status := response_message.Status{
 					Code:    "200",
@@ -105,7 +121,10 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 					h.logger.Fatal().Err(err)
 				}
 				h.logger.Info().Msg("delete")
-				h.signalingUseCase.Delete(deleteMessage.UserInfo)
+				err := h.signalingUseCase.Delete(deleteMessage.UserInfo)
+				if err != nil {
+					return
+				}
 
 				status := response_message.Status{
 					Code:    "200",
@@ -194,12 +213,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 				h.logger.Info().Msg("send")
 				h.signalingUseCase.Send()
 
-				status := response_message.Status{
-					Code:    "200",
-					Message: "OK",
-					Type:    "send",
-				}
-				responseMessage, err = json.Marshal(status)
+				responseMessage, err = h.makeResponseMessage("200", "OK", "send")
 				if err != nil {
 					h.logger.Fatal().Err(err)
 				}
@@ -207,24 +221,32 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 			default:
 				h.logger.Info().Msg("invalid message")
 
-				status := response_message.Status{
-					Code:    "400",
-					Message: "Invalid Message",
-					Type:    "undefined",
-				}
-				responseMessage, err = json.Marshal(status)
+				responseMessage, err = h.makeResponseMessage("400", "Invalid Message", "undefined")
 				if err != nil {
 					h.logger.Fatal().Err(err)
 				}
-
 			}
 
-			// ここでステータスコードを返す?
-			h.logger.Info().Msg(string(responseMessage))
+			// ここでメッセージを返す
+			h.logger.Debug().Msg(string(responseMessage))
 			err = wsutil.WriteServerMessage(conn, op, responseMessage)
 			if err != nil {
 				h.logger.Fatal().Err(err)
 			}
 		}
 	}()
+}
+
+func (h *signalingHandler) makeResponseMessage(code string, message string, actionType string) ([]byte, error) {
+	status := response_message.Status{
+		Code:    code,
+		Message: message,
+		Type:    actionType,
+	}
+	responseMessage, err := json.Marshal(status)
+	if err != nil {
+		h.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return responseMessage, nil
 }

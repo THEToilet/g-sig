@@ -17,6 +17,7 @@ import (
 var (
 	version = "0.1.0"
 	logger  *zerolog.Logger
+	//config config.Config
 )
 
 func init() {
@@ -34,10 +35,13 @@ func init() {
 	config := config.NewConfig(buffer)
 	fmt.Println(config)
 
-	logger, err = logger2.NewLogger()
+	logger, err = logger2.NewLogger(config)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	logger.Info().Str("Title",config.Title).Msg("Config")
+	logger.Info().Str("LogLevel",config.LogInfo.Level).Msg("Config")
 }
 
 func main() {
@@ -61,5 +65,4 @@ func main() {
 		logger.Fatal().Err(err)
 	}
 	logger.Info().Msg("Serve is running")
-
 }

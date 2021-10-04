@@ -3,13 +3,13 @@ package message
 import "g-sig/pkg/domain/model"
 
 type Status struct {
-	Code string `json:"code"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
-	Type string `json:"type"`
+	Type    string `json:"type"`
 }
 
 type SearchResponse struct {
-	Status Status `json:"status"`
+	Status           Status            `json:"status"`
 	SearchedUserList []*model.UserInfo `json:"searchedUserList"`
 }
 type RegisterResponse struct {

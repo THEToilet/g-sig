@@ -26,13 +26,6 @@ func NewUserInfoRepository(logger *zerolog.Logger) *userInfoRepository {
 }
 
 func (u userInfoRepository) Find(userID string) (*model.UserInfo, error) {
-	/*
-	userInfo, ok := UserInfoList[userID]
-	if !ok {
-		return nil, errors.New("user not found")
-	}
-	return &userInfo, nil
-	 */
 	userInfo, ok := UserInfoList.Load(userID)
 	if !ok {
 		return nil, errors.New("user not found")
@@ -45,13 +38,6 @@ func (u userInfoRepository) Find(userID string) (*model.UserInfo, error) {
 }
 
 func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
-	/*
-	var userInfoList []*model.UserInfo
-	for _, userInfo := range UserInfoList {
-		userInfoList = append(userInfoList, &userInfo)
-	}
-	return userInfoList, nil
-	 */
 	var userInfoList []*model.UserInfo
 	UserInfoList.Range(func(key, value interface{}) bool{
 		v, ok := value.(model.UserInfo)
@@ -65,14 +51,6 @@ func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
 }
 
 func (u userInfoRepository) Save(user model.UserInfo) error {
-	/*
-	_, ok := UserInfoList[user.UserID]
-	if ok {
-		return  errors.New("user found")
-	}
-	UserInfoList[user.UserID] = user
-	return nil
-	 */
 	_, ok := UserInfoList.Load(user.UserID)
 	if ok {
 		return  errors.New("user found")
@@ -82,14 +60,6 @@ func (u userInfoRepository) Save(user model.UserInfo) error {
 }
 
 func (u userInfoRepository) Update(user model.UserInfo) error {
-	/*
-	_, ok := UserInfoList[user.UserID]
-	if !ok {
-		return errors.New("user not found")
-	}
-	UserInfoList[user.UserID] = user
-	return nil
-	 */
 	_, ok := UserInfoList.Load(user.UserID)
 	if !ok {
 		return errors.New("user not found")
@@ -99,14 +69,6 @@ func (u userInfoRepository) Update(user model.UserInfo) error {
 }
 
 func (u userInfoRepository) Delete(userID string) error {
-	/*
-	_, ok := UserInfoList[userID]
-	if !ok {
-		return errors.New("user not found")
-	}
-	delete(UserInfoList, userID)
-	return nil
-	 */
 	_, ok := UserInfoList.Load(userID)
 	if !ok {
 		return errors.New("user not found")
