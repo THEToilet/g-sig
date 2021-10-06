@@ -11,7 +11,7 @@ import (
 var _ repository.UserInfoRepository = &userInfoRepository{}
 
 var (
-//	UserInfoList =  map[string]model.UserInfo{}
+	//	UserInfoList =  map[string]model.UserInfo{}
 	UserInfoList = &sync.Map{}
 )
 
@@ -39,7 +39,7 @@ func (u userInfoRepository) Find(userID string) (*model.UserInfo, error) {
 
 func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
 	var userInfoList []*model.UserInfo
-	UserInfoList.Range(func(key, value interface{}) bool{
+	UserInfoList.Range(func(key, value interface{}) bool {
 		v, ok := value.(model.UserInfo)
 		if !ok {
 			return false
@@ -53,7 +53,7 @@ func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
 func (u userInfoRepository) Save(user model.UserInfo) error {
 	_, ok := UserInfoList.Load(user.UserID)
 	if ok {
-		return  errors.New("user found")
+		return errors.New("user found")
 	}
 	UserInfoList.Store(user.UserID, user)
 	return nil
@@ -76,4 +76,3 @@ func (u userInfoRepository) Delete(userID string) error {
 	UserInfoList.Delete(userID)
 	return nil
 }
-
