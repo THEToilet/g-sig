@@ -6,6 +6,7 @@ import (
 	"g-sig/pkg/server/handler"
 	"github.com/rs/zerolog"
 	"net/http"
+	"time"
 )
 
 func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *http.Server {
@@ -27,20 +28,11 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 		logger.Info().Msg(" /stun Access is Successful")
 	})
 	server := &http.Server{
-		Addr:              "127.0.0.1:8080",
+		Addr:              ":8080",
 		Handler:           mux,
-		TLSConfig:         nil,
-		// TODO: TimeOutの設定
-		ReadTimeout:       0,
-		ReadHeaderTimeout: 0,
-		WriteTimeout:      0,
-		IdleTimeout:       0,
-		MaxHeaderBytes:    0,
-		TLSNextProto:      nil,
-		ConnState:         nil,
-		ErrorLog:          nil,
-		BaseContext:       nil,
-		ConnContext:       nil,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		MaxHeaderBytes:    1 << 20,
 	}
 	return server
 }

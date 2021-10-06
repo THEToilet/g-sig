@@ -40,8 +40,8 @@ func init() {
 		log.Fatal(err)
 	}
 
-	logger.Info().Str("Title",config.Title).Msg("Config")
-	logger.Info().Str("LogLevel",config.LogInfo.Level).Msg("Config")
+	logger.Info().Str("Title", config.Title).Msg("Config")
+	logger.Info().Str("LogLevel", config.LogInfo.Level).Msg("Config")
 }
 
 func main() {
@@ -64,5 +64,5 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		logger.Fatal().Err(err)
 	}
-	logger.Info().Msg("Serve is running")
+	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
 }
