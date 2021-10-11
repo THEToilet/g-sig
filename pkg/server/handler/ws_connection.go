@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"g-sig/pkg/domain/application"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/rs/zerolog"
@@ -29,7 +30,7 @@ func NewWSConnection(conn net.Conn, receiveMessage chan []byte, sendingMessage c
 	}
 }
 
-func stopTimer(timer *time.Timer){
+func stopTimer(timer *time.Timer) {
 	if !timer.Stop() {
 		<-timer.C
 	}
@@ -40,7 +41,7 @@ func (w *WSConnection) selector(ctx context.Context, cancel context.CancelFunc) 
 	pongTimer := time.NewTimer(10 * time.Second)
 	stopTimer(pongTimer)
 	defer func() {
-		// TODO　ここ呼ばれない:w
+		// TODO　ここ呼ばれない
 		stopTimer(pongTimer)
 		pingTimer.Stop()
 		w.logger.Debug().Caller().Msg("ddddddd")
@@ -55,7 +56,13 @@ L:
 		case <-pingTimer.C:
 			w.logger.Info().Msg("ping")
 			// send ping message
-			if err := w.sendMessage([]byte{}); err != nil {
+			/* TODO: 要リファクタリング */
+			status := w.makeStatusMessage("ping", "200", "please send pong")
+			responseMessage, err := json.Marshal(status)
+			if err != nil {
+				w.logger.Fatal().Err(err)
+			}
+			if err := w.sendMessage(responseMessage); err != nil {
 				break L
 			}
 			pongTimer.Reset(10 * time.Second)
