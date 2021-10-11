@@ -106,6 +106,8 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	w.logger.Debug().Interface("message", message).Msg("Unmarshall message")
 
 	switch message.Type {
+	case "p2p":
+		// pWebRTCのシグナリングサーバとして動く
 	case "pong":
 		stopTimer(pongTimer)
 		pongTimer.Reset(time.Second * 10)
