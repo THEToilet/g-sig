@@ -47,7 +47,7 @@ func (w *WSConnection) selector(ctx context.Context, cancel context.CancelFunc) 
 		stopTimer(pongTimer)
 		pingTimer.Stop()
 		w.logger.Debug().Caller().Msg("ddddddd")
-		// TODO userをデリートする
+		w.signalingUseCase.Delete(w.userID)
 	}()
 
 	// TODO 疎通確認のping pong
@@ -82,7 +82,7 @@ L:
 			2021-10-06T20:54:16+09:00 | DEBUG | Unmarshall message
 			2021-10-06T20:54:16+09:00 | DEBUG | Invalid Message rawMessage=eyJjb2RlIjoiNDAwIiwibWVzc2FnZSI6IkludmFsaWQgTWVzc2FnZSIsInR5cGUiOiJ1bmRlZmluZWQifQ== */
 
-			//w.handleMessage(msg, pongTimer)
+			w.handleMessage(msg, pongTimer)
 		case msg, ok := <-w.sendingMessage:
 			w.logger.Info().Msg(string(msg))
 			if !ok {
@@ -106,7 +106,7 @@ L:
 
 func (w *WSConnection) receiver(ctx context.Context) {
 	defer func() {
-		w.logger.Debug().Msg("ws id close")
+		w.logger.Debug().Msg("WebSocket is closed")
 		w.conn.Close()
 	}()
 L:

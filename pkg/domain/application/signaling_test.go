@@ -4,9 +4,9 @@ import (
 	"errors"
 	"g-sig/pkg/domain/model"
 	"g-sig/pkg/gateway/repository"
+	"github.com/google/go-cmp/cmp"
 	"github.com/rs/zerolog"
 	"os"
-	"reflect"
 	"testing"
 )
 
@@ -34,7 +34,7 @@ func TestSignalingUseCase_Register(t *testing.T) {
 				logger:             zerolog.New(os.Stdout).With().Timestamp().Logger(),
 			},
 			args: args{
-				userID: "1234",
+				userID: "1000",
 				geoLocation: model.GeoLocation{
 					Latitude:  0,
 					Longitude: 0,
@@ -76,6 +76,7 @@ func TestSignalingUseCase_Register(t *testing.T) {
 				t.Errorf("Register() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			tt.fields.userInfoRepository.Delete("1234")
 		})
 	}
 }
@@ -104,9 +105,9 @@ func TestSignalingUseCase_Update(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
-					Latitude:  0,
-					Longitude: 0,
+					UserID:    "123-123",
+					Latitude:  1,
+					Longitude: 1,
 				},
 			},
 			wantErr: nil,
@@ -125,7 +126,7 @@ func TestSignalingUseCase_Update(t *testing.T) {
 					Longitude: 0,
 				},
 			},
-			wantErr: nil,
+			wantErr: model.ErrUserNotFound,
 		},
 	}
 	for _, tt := range tests {
@@ -135,10 +136,16 @@ func TestSignalingUseCase_Update(t *testing.T) {
 				userInfoRepository: tt.fields.userInfoRepository,
 				logger:             &tt.fields.logger,
 			}
+			tt.fields.userInfoRepository.Save(model.UserInfo{
+				UserID:    "123-123",
+				Latitude:  0,
+				Longitude: 0,
+			})
 			err := s.Update(tt.args.userInfo)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
+			tt.fields.userInfoRepository.Delete("123-123")
 		})
 	}
 }
@@ -167,7 +174,7 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
+					UserID:    "11-11",
 					Latitude:  0,
 					Longitude: 0,
 				},
@@ -183,12 +190,12 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
+					UserID:    "00000000",
 					Latitude:  0,
 					Longitude: 0,
 				},
 			},
-			wantErr: nil,
+			wantErr: model.ErrUserNotFound,
 		},
 	}
 	for _, tt := range tests {
@@ -198,7 +205,12 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 				userInfoRepository: tt.fields.userInfoRepository,
 				logger:             &tt.fields.logger,
 			}
-			err := s.Delete(tt.args.userInfo)
+			tt.fields.userInfoRepository.Save(model.UserInfo{
+				UserID:    "11-11",
+				Latitude:  0,
+				Longitude: 0,
+			})
+			err := s.Delete(tt.args.userInfo.UserID)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -207,6 +219,16 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 }
 
 func TestSignalingUseCase_StaticSearch(t *testing.T) {
+	/*
+		中心
+		35.943218, 139.621248
+		成功
+		35.943250, 139.621090
+		35.942769, 139.621478
+		エラー
+		35.942225, 139.617875
+	*/
+
 	type fields struct {
 		userRepository     repository.UserRepository
 		userInfoRepository repository.UserInfoRepository
@@ -231,13 +253,24 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
-					Latitude:  0,
-					Longitude: 0,
+					UserID:    "123",
+					Latitude:  35.943218,
+					Longitude: 139.621248,
 				},
-				searchDistance: 0,
+				searchDistance: 100,
 			},
-			want: nil,
+			want: []*model.UserInfo{
+				{
+					UserID:    "1101",
+					Latitude:  35.943250,
+					Longitude: 139.621090,
+				},
+				{
+					UserID:    "1102",
+					Latitude:  35.942769,
+					Longitude: 139.621478,
+				},
+			},
 		},
 		{
 			name: "staticSearch_error",
@@ -248,9 +281,9 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
-					Latitude:  0,
-					Longitude: 0,
+					UserID:    "123",
+					Latitude:  35.943218,
+					Longitude: 139.621248,
 				},
 				searchDistance: 0,
 			},
@@ -264,14 +297,31 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 				userInfoRepository: tt.fields.userInfoRepository,
 				logger:             &tt.fields.logger,
 			}
+			tt.fields.userInfoRepository.Save(model.UserInfo{
+				UserID:    "1101",
+				Latitude:  35.943250,
+				Longitude: 139.621090,
+			})
+			tt.fields.userInfoRepository.Save(model.UserInfo{
+				UserID:    "1102",
+				Latitude:  35.942769,
+				Longitude: 139.621478,
+			})
+			tt.fields.userInfoRepository.Save(model.UserInfo{
+				UserID:    "1103",
+				Latitude:  35.942225,
+				Longitude: 139.617875,
+			})
 			got := s.StaticSearch(tt.args.userInfo, tt.args.searchDistance)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("StaticSearch() got = %v, want %v", got, tt.want)
+			if !cmp.Equal(got, tt.want) {
+				t.Errorf("FindAll() got = %v, want %v", got, tt.want)
+				t.Errorf("FindAll() diff = %v", cmp.Diff(tt.want, got))
 			}
 		})
 	}
 }
 
+/*
 func TestSignalingUseCase_DynamicSearch(t *testing.T) {
 	type fields struct {
 		userRepository     repository.UserRepository
@@ -337,3 +387,4 @@ func TestSignalingUseCase_DynamicSearch(t *testing.T) {
 		})
 	}
 }
+*/

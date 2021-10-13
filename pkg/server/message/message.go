@@ -16,3 +16,7 @@ type RegisterResponse struct {
 	Status Status `json:"status"`
 	UserID string `json:"userID"`
 }
+type AlterRegisterResponse struct {
+	Type   string `json:"type"`
+	UserID string `json:"userID"`
+}

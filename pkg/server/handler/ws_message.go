@@ -35,8 +35,9 @@ func (w *WSConnection) sendMessage(message []byte) error {
 }
 
 func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
-	registerResponse := respMessage.RegisterResponse{
-		Status: w.makeStatusMessage("", "", ""),
+	registerResponse := respMessage.AlterRegisterResponse{
+		Type: "register",
+		//Status: w.makeStatusMessage("register", "200", ""),
 		UserID: userID,
 	}
 	responseMessage, err := json.Marshal(registerResponse)
@@ -104,8 +105,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.logger.Fatal()
 	}
 
-	w.logger.Debug().Interface("message", message).Msg("Unmarshall message")
-
 	switch message.Type {
 	case "p2p":
 		// pWebRTCのシグナリングサーバとして動く
@@ -137,7 +136,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		responseMessage, err := w.makeRegisterMessage(userID.String())
 
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 
 	case "update":
 
@@ -157,7 +156,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 
 	case "delete":
 
@@ -176,7 +175,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 
 	case "search":
 
@@ -206,7 +205,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 
 	case "send":
 
@@ -222,7 +221,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 
 	default:
 		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid Message")
@@ -231,6 +230,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.receiveMessage <- responseMessage
+		w.sendingMessage <- responseMessage
 	}
 }
