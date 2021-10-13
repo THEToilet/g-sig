@@ -6,6 +6,7 @@ import (
 	respMessage "g-sig/pkg/server/message"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -121,14 +122,20 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		}
 		w.logger.Info().Msg("register")
 
-		userID, err := w.signalingUseCase.Register(registerMessage.UserInfo)
+		userID, err := uuid.NewUUID()
+		if err != nil {
+			return
+		}
+
+		err = w.signalingUseCase.Register(userID.String(), registerMessage.GeoLocation)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
 
 		w.isRegistered = true
+		w.userID = userID.String()
 
-		responseMessage, err := w.makeRegisterMessage(userID)
+		responseMessage, err := w.makeRegisterMessage(userID.String())
 
 		w.receiveMessage <- responseMessage
 
@@ -184,17 +191,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		switch searchMessage.SearchType {
 		case "static":
-			var err error
-			searchedUserList, err = w.signalingUseCase.StaticSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
-			if err != nil {
-				w.logger.Fatal().Err(err)
-			}
+			searchedUserList = w.signalingUseCase.StaticSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
 		case "dynamic":
-			var err error
-			searchedUserList, err = w.signalingUseCase.DynamicSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
-			if err != nil {
-				w.logger.Fatal().Err(err)
-			}
+			searchedUserList = w.signalingUseCase.DynamicSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
 		default:
 			w.logger.Info().Msg("invalid type")
 		}

@@ -33,7 +33,7 @@ func (u UserInfoRepository) Find(userID string) (*model.UserInfo, error) {
 	return &v, nil
 }
 
-func (u UserInfoRepository) FindAll() ([]*model.UserInfo, error) {
+func (u UserInfoRepository) FindAll() []*model.UserInfo {
 	var userInfoList []*model.UserInfo
 	UserInfoList.Range(func(key, value interface{}) bool {
 		v, ok := value.(model.UserInfo)
@@ -43,7 +43,7 @@ func (u UserInfoRepository) FindAll() ([]*model.UserInfo, error) {
 		userInfoList = append(userInfoList, &v)
 		return true
 	})
-	return userInfoList, nil
+	return userInfoList
 }
 
 func (u UserInfoRepository) Save(user model.UserInfo) error {

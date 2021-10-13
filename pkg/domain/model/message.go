@@ -5,8 +5,8 @@ type Message struct {
 }
 
 type RegisterMessage struct {
-	Type     string   `json:"type"`
-	UserInfo UserInfo `json:"userInfo"`
+	Type        string      `json:"type"`
+	GeoLocation GeoLocation `json:"geoLocation"`
 }
 
 type UpdateMessage struct {

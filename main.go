@@ -54,8 +54,8 @@ func main() {
 	}
 
 	// Repository
-	userRepository := repository.NewUserRepository(logger)
-	userInfoRepository := repository.NewUserInfoRepository(logger)
+	userRepository := repository.NewUserRepository()
+	userInfoRepository := repository.NewUserInfoRepository()
 
 	// UseCase
 	signalingUseCase := application.NewSignalingUseCase(userRepository, userInfoRepository, logger)
