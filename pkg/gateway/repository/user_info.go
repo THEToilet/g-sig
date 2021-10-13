@@ -1,43 +1,39 @@
 package repository
 
 import (
-	"errors"
 	"g-sig/pkg/domain/model"
 	"g-sig/pkg/domain/repository"
-	"github.com/rs/zerolog"
 	"sync"
 )
 
-var _ repository.UserInfoRepository = &userInfoRepository{}
+var _ repository.UserInfoRepository = &UserInfoRepository{}
 
 var (
 	//	UserInfoList =  map[string]model.UserInfo{}
 	UserInfoList = &sync.Map{}
 )
 
-type userInfoRepository struct {
-	logger *zerolog.Logger
+type UserInfoRepository struct {
 }
 
-func NewUserInfoRepository(logger *zerolog.Logger) *userInfoRepository {
-	return &userInfoRepository{
-		logger: logger,
+func NewUserInfoRepository() *UserInfoRepository {
+	return &UserInfoRepository{
 	}
 }
 
-func (u userInfoRepository) Find(userID string) (*model.UserInfo, error) {
+func (u UserInfoRepository) Find(userID string) (*model.UserInfo, error) {
 	userInfo, ok := UserInfoList.Load(userID)
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, model.ErrUserNotFound
 	}
 	v, ok := userInfo.(model.UserInfo)
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, model.ErrUserNotFound
 	}
 	return &v, nil
 }
 
-func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
+func (u UserInfoRepository) FindAll() ([]*model.UserInfo, error) {
 	var userInfoList []*model.UserInfo
 	UserInfoList.Range(func(key, value interface{}) bool {
 		v, ok := value.(model.UserInfo)
@@ -50,28 +46,28 @@ func (u userInfoRepository) FindAll() ([]*model.UserInfo, error) {
 	return userInfoList, nil
 }
 
-func (u userInfoRepository) Save(user model.UserInfo) error {
+func (u UserInfoRepository) Save(user model.UserInfo) error {
 	_, ok := UserInfoList.Load(user.UserID)
 	if ok {
-		return errors.New("user found")
+		return model.ErrUserAlreadyExisted
 	}
 	UserInfoList.Store(user.UserID, user)
 	return nil
 }
 
-func (u userInfoRepository) Update(user model.UserInfo) error {
+func (u UserInfoRepository) Update(user model.UserInfo) error {
 	_, ok := UserInfoList.Load(user.UserID)
 	if !ok {
-		return errors.New("user not found")
+		return model.ErrUserNotFound
 	}
 	UserInfoList.Store(user.UserID, user)
 	return nil
 }
 
-func (u userInfoRepository) Delete(userID string) error {
+func (u UserInfoRepository) Delete(userID string) error {
 	_, ok := UserInfoList.Load(userID)
 	if !ok {
-		return errors.New("user not found")
+		return model.ErrUserNotFound
 	}
 	UserInfoList.Delete(userID)
 	return nil

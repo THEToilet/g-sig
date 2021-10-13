@@ -6,30 +6,30 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var _ repository.UserRepository = &userRepository{}
+var _ repository.UserRepository = &UserRepository{}
 
-type userRepository struct {
+type UserRepository struct {
 	logger *zerolog.Logger
 }
 
-func (u userRepository) Find(id string) (*model.User, error) {
+func (u UserRepository) Find(id string) (*model.User, error) {
 	panic("implement me")
 }
 
-func (u userRepository) FindAll() ([]*model.User, error) {
+func (u UserRepository) FindAll() ([]*model.User, error) {
 	panic("implement me")
 }
 
-func (u userRepository) Save(user model.User) error {
+func (u UserRepository) Save(user model.User) error {
 	panic("implement me")
 }
 
-func (u userRepository) Delete(id string) error {
+func (u UserRepository) Delete(id string) error {
 	panic("implement me")
 }
 
-func NewUserRepository(logger *zerolog.Logger) *userRepository {
-	return &userRepository{
+func NewUserRepository(logger *zerolog.Logger) *UserRepository {
+	return &UserRepository{
 		logger: logger,
 	}
 }
