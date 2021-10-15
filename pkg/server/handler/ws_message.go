@@ -166,7 +166,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 		w.logger.Info().Msg("delete")
-		err := w.signalingUseCase.Delete(deleteMessage.UserInfo)
+		err := w.signalingUseCase.Delete(deleteMessage.UserInfo.UserID)
 		if err != nil {
 			return
 		}

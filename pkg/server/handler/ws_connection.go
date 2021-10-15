@@ -77,11 +77,6 @@ L:
 				w.logger.Fatal().Msg("d")
 				break L
 			}
-			// TODO バグがある
-			/* 2021-10-06T20:54:16+09:00 | INFO  | {"code":"400","message":"Invalid Message","type":"undefined"}
-			2021-10-06T20:54:16+09:00 | DEBUG | Unmarshall message
-			2021-10-06T20:54:16+09:00 | DEBUG | Invalid Message rawMessage=eyJjb2RlIjoiNDAwIiwibWVzc2FnZSI6IkludmFsaWQgTWVzc2FnZSIsInR5cGUiOiJ1bmRlZmluZWQifQ== */
-
 			w.handleMessage(msg, pongTimer)
 		case msg, ok := <-w.sendingMessage:
 			w.logger.Info().Msg(string(msg))
