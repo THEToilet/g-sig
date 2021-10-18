@@ -101,90 +101,143 @@ userIDはサーバ側で保持する方向にする
 - client
 
 ```typescript
-type Status = {
-    code: string
-    message: string
-    type: string
-}
+//--------response----------
 type SearchResponse = {
-    status: Status
-    searchedUserList: BackEndUserInfo[]
+    type: string
+    message: string
+    geoLocation: GeoLocation
+    surroundingUserList: UserInfo[]
 }
 
 type RegisterResponse = {
-    status: Status
+    type: string
+    message: string
     userID: string
 }
 
-type StunResponse = {
-    addr: Addr
+type UpdateResponse  = {
+    type :   string
+    message: string
 }
 
-type JudgeStatus = {
-    status: Status
+type DeleteResponse = {
+    type :   string
+    message: string 
 }
 
-type BackEndUserInfo = {
-    userID: string
-    publicIP: string
-    publicPort: number
-    privateIP: string
-    privatePort: number
+type SendResponse = {
+    type :   string
+    message: string
+}
+
+type JudgeMessageType = {
+    type :   string
+}
+//----------request----------
+
+type PongReauest = {
+    type: string
+}
+
+type RegisterReguest = {
+     type: string
+    geoLocation: GeoLocation
+}
+
+type UpdateRequest = {
+    type: string
+    geoLocation: GeoLocation
+}
+
+type SearchRequest = {
+    type: string
+    searchType: string
+    searchDistance: number
+}
+
+type DeleteRequest = {
+    type: string
+}
+
+type SendRequest = {
+     type: string
+     message: string
+}
+//--------------------------
+    
+type GeoLocation = {
     latitude: number
     longitude: number
+}
+
+type UserInfo = {
+    userID: string
+    geoLocation : GeoLocation
 }
 
 ```
 
 - server
 
+typeにはやり取りをするプロトコルを書く
+messageはエラーがある場合のみ書く
 ```go
 
-type Status struct {
-    Code    string `json:"code"`
-    Message string `json:"message"`
+
+type RegisterResponse struct {
     Type    string `json:"type"`
+    Message string `json:"message"`
+    UserID string `json:"userID"`
+}
+type UpdateResponse struct {
+    Type    string `json:"type"`
+    Message string `json:"message"`
 }
 
 type SearchResponse struct {
-    Status           Status            `json:"status"`
-    SearchedUserList []*model.UserInfo `json:"searchedUserList"`
+    Type    string `json:"type"`
+    Message string `json:"message"`
+    SurroundingUserList []*model.UserInfo `json:"surroundingUserList"`
 }
-type RegisterResponse struct {
-    Status Status `json:"status"`
-    UserID string `json:"userID"`
+
+type DeleteResponse struct {
+    Type    string `json:"type"`
+    Message string `json:"message"`
+}
+
+type SendResponse struct {
+    Type    string `json:"type"`
+    Message string `json:"message"`
 }
 
 
 // --------------------------
 
-type Message struct {
+type JudgeMessageType struct {
     Type string `json:"type"`
 }
 
-type RegisterMessage struct {
+type RegisterRequest struct {
     Type     string   `json:"type"`
-    UserInfo UserInfo `json:"userInfo"`
+	GeoLocation GeoLocation `json:"geoLocation"`
 }
 
-type UpdateMessage struct {
+type UpdateRequest struct {
     Type     string   `json:"type"`
-    UserInfo UserInfo `json:"userInfo"`
+    GeoLocation GeoLocation `json:"geoLocation"`
 }
 
-type SearchMessage struct {
+type SearchRequest struct {
     Type           string   `json:"type"`
-    UserInfo       UserInfo `json:"userInfo"`
     SearchType     string   `json:"searchType"`
     SearchDistance float64  `json:"searchDistance"`
 }
 
-type DeleteMessage struct {
+type DeleteRequest struct {
     Type     string   `json:"type"`
-    UserInfo UserInfo `json:"userInfo"`
 }
 
-type SendMessage struct {
+type SendRequest struct {
     Type    string `json:"type"`
     Message string `json:"message"`
 }
@@ -196,35 +249,16 @@ type User struct {
     UserName string
 }
 
-
 // UserInfo ユーザの頻繁に変わる情報
 type UserInfo struct {
     UserID      string  `json:"userID"`
-    PublicIP    string  `json:"publicIP"`
-    PublicPort  uint8   `json:"publicPort"`
-    PrivateIP   string  `json:"privateIP"`
-    PrivatePort uint8   `json:"privatePort"`
-    Latitude    float64 `json:"latitude"`
-    Longitude   float64 `json:"longitude"`
+	GeoLocation GeoLocation `json:"geoLocation"`
 }
 
 // GeoLocation ユーザの位置情報
 type GeoLocation struct {
     Latitude  string `json:"latitude"`
     Longitude string `json:"longitude"`
-}
-
-type Addr struct {
-    IP   string `json:"ip"`
-    Port uint8  `json:"port"`
-}
-
-// AlterUserInfo 別の案
-type AlterUserInfo struct {
-    UserID      string      `json:"userID"`
-    PublicAddr  Addr        `json:"public"`
-    PrivateAddr Addr        `json:"private"`
-    GeoLocation GeoLocation `json:"geoLocation"`
 }
 ```
 

@@ -11,8 +11,7 @@ import (
 )
 
 func (w *WSConnection) makeResponseMessage(code string, message string, actionType string) ([]byte, error) {
-	status := respMessage.Status{
-		Code:    code,
+	status := respMessage.Response{
 		Message: message,
 		Type:    actionType,
 	}
@@ -35,9 +34,8 @@ func (w *WSConnection) sendMessage(message []byte) error {
 }
 
 func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
-	registerResponse := respMessage.AlterRegisterResponse{
-		Type: "register",
-		//Status: w.makeStatusMessage("register", "200", ""),
+	registerResponse := respMessage.RegisterResponse{
+		Type:   "register",
 		UserID: userID,
 	}
 	responseMessage, err := json.Marshal(registerResponse)
@@ -48,8 +46,11 @@ func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
 	return responseMessage, nil
 }
 func (w *WSConnection) makeUpdateMessage() ([]byte, error) {
-	status := w.makeStatusMessage("", "", "")
-	responseMessage, err := json.Marshal(status)
+	updateResponse := respMessage.UpdateResponse{
+		Type:    "update",
+		Message: "",
+	}
+	responseMessage, err := json.Marshal(updateResponse)
 	if err != nil {
 		w.logger.Fatal().Err(err)
 		return nil, err
@@ -57,8 +58,11 @@ func (w *WSConnection) makeUpdateMessage() ([]byte, error) {
 	return responseMessage, nil
 }
 func (w *WSConnection) makeDeleteMessage() ([]byte, error) {
-	status := w.makeStatusMessage("", "", "")
-	responseMessage, err := json.Marshal(status)
+	deleteResponse := respMessage.DeleteResponse{
+		Type:    "delete",
+		Message: "",
+	}
+	responseMessage, err := json.Marshal(deleteResponse)
 	if err != nil {
 		w.logger.Fatal().Err(err)
 		return nil, err
@@ -67,8 +71,9 @@ func (w *WSConnection) makeDeleteMessage() ([]byte, error) {
 }
 func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo) ([]byte, error) {
 	searchResponse := respMessage.SearchResponse{
-		Status:           w.makeStatusMessage("", "", ""),
-		SearchedUserList: searchedUserList,
+		Type:                "search",
+		Message:             "",
+		SurroundingUserList: searchedUserList,
 	}
 	responseMessage, err := json.Marshal(searchResponse)
 	if err != nil {
@@ -79,25 +84,20 @@ func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo) ([]
 
 }
 func (w *WSConnection) makeSendMessage() ([]byte, error) {
-	status := w.makeStatusMessage("", "", "")
-	responseMessage, err := json.Marshal(status)
+	sendResponse := respMessage.SendResponse{
+		Type:    "send",
+		Message: "",
+	}
+	responseMessage, err := json.Marshal(sendResponse)
 	if err != nil {
 		w.logger.Fatal().Err(err)
 		return nil, err
 	}
 	return responseMessage, nil
 }
-func (w *WSConnection) makeStatusMessage(actionType string, code string, message string) respMessage.Status {
-	status := respMessage.Status{
-		Type:    actionType,
-		Code:    code,
-		Message: message,
-	}
-	return status
-}
 
 func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
-	message := &model.Message{}
+	message := &respMessage.RequestType{}
 	if err := json.Unmarshal(rawMessage, &message); err != nil {
 		w.logger.Fatal().Err(err)
 	}
@@ -115,7 +115,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "register":
 
 		// userInfo登録
-		registerMessage := &model.RegisterMessage{}
+		registerMessage := &respMessage.RegisterRequest{}
 		if err := json.Unmarshal(rawMessage, &registerMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -141,7 +141,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "update":
 
 		// userInfo更新
-		updateMessage := &model.UpdateMessage{}
+		updateMessage := &respMessage.UpdateRequest{}
 		if err := json.Unmarshal(rawMessage, &updateMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -161,7 +161,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "delete":
 
 		// userInfo削除
-		deleteMessage := &model.DeleteMessage{}
+		deleteMessage := &respMessage.DeleteRequest{}
 		if err := json.Unmarshal(rawMessage, &deleteMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -180,7 +180,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "search":
 
 		// 周囲端末検索
-		searchMessage := &model.SearchMessage{}
+		searchMessage := &respMessage.SearchRequest{}
 		if err := json.Unmarshal(rawMessage, &searchMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -210,7 +210,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "send":
 
 		// 周囲に一斉送信
-		sendMessage := &model.SendMessage{}
+		sendMessage := &respMessage.SendRequest{}
 		if err := json.Unmarshal(rawMessage, &sendMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -224,9 +224,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.sendingMessage <- responseMessage
 
 	default:
-		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid Message")
+		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid RequestType")
 
-		responseMessage, err := w.makeResponseMessage("400", "Invalid Message", "undefined")
+		responseMessage, err := w.makeResponseMessage("400", "Invalid RequestType", "undefined")
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
