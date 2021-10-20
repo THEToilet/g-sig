@@ -27,7 +27,7 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 		return
 	}
 	h.logger.Info().Msg("Connection Start")
-	//h.logger.Debug().Caller().Msg("dddddddddddd")
+	//h.logger.Debug().Caller().Msg("")
 
 	// goroutineのキャンセル処理に使う
 	ctx, cancel := context.WithCancel(context.Background())

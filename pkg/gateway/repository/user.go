@@ -8,8 +8,7 @@ import (
 var _ repository.UserRepository = &UserRepository{}
 
 func NewUserRepository() *UserRepository {
-	return &UserRepository{
-	}
+	return &UserRepository{}
 }
 
 type UserRepository struct {
@@ -30,4 +29,3 @@ func (u UserRepository) Save(user model.User) error {
 func (u UserRepository) Delete(id string) error {
 	panic("implement me")
 }
-

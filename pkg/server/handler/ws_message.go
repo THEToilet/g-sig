@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-func (w *WSConnection) makeResponseMessage(code string, message string, actionType string) ([]byte, error) {
+// 今はエラー用だけに使われている
+func (w *WSConnection) makeResponseMessage(message string, actionType string) ([]byte, error) {
 	status := respMessage.Response{
 		Message: message,
 		Type:    actionType,
@@ -31,6 +32,18 @@ func (w *WSConnection) sendMessage(message []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (w *WSConnection) makePingMessage() ([]byte, error) {
+	pingRequest := respMessage.PingRequest{
+		Type: "ping",
+	}
+	requestMessage, err := json.Marshal(pingRequest)
+	if err != nil {
+		w.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return requestMessage, nil
 }
 
 func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
@@ -97,7 +110,7 @@ func (w *WSConnection) makeSendMessage() ([]byte, error) {
 }
 
 func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
-	message := &respMessage.RequestType{}
+	message := &respMessage.JudgeMessageType{}
 	if err := json.Unmarshal(rawMessage, &message); err != nil {
 		w.logger.Fatal().Err(err)
 	}
@@ -166,7 +179,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 		w.logger.Info().Msg("delete")
-		err := w.signalingUseCase.Delete(deleteMessage.UserInfo.UserID)
+		err := w.signalingUseCase.Delete(w.userID)
 		if err != nil {
 			return
 		}
@@ -190,9 +203,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		switch searchMessage.SearchType {
 		case "static":
-			searchedUserList = w.signalingUseCase.StaticSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
+			searchedUserList = w.signalingUseCase.StaticSearch(w.userID, searchMessage.GeoLocation, searchMessage.SearchDistance)
 		case "dynamic":
-			searchedUserList = w.signalingUseCase.DynamicSearch(searchMessage.UserInfo, searchMessage.SearchDistance)
+			searchedUserList = w.signalingUseCase.DynamicSearch(w.userID, searchMessage.GeoLocation, searchMessage.SearchDistance)
 		default:
 			w.logger.Info().Msg("invalid type")
 		}
@@ -226,7 +239,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	default:
 		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid RequestType")
 
-		responseMessage, err := w.makeResponseMessage("400", "Invalid RequestType", "undefined")
+		responseMessage, err := w.makeResponseMessage("Invalid RequestType", "undefined")
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}

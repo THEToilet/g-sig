@@ -49,7 +49,7 @@ func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLoca
 	return searchedUserList
 }
 
-func (s *SignalingUseCase) DynamicSearch(userInfo model.UserInfo, searchDistance float64) []*model.UserInfo {
+func (s *SignalingUseCase) DynamicSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
 	userInfoList := s.userInfoRepository.FindAll()
 	// DoSomething
 	return userInfoList

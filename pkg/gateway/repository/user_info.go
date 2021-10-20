@@ -9,7 +9,6 @@ import (
 var _ repository.UserInfoRepository = &UserInfoRepository{}
 
 var (
-	//	UserInfoList =  map[string]model.UserInfo{}
 	UserInfoList = &sync.Map{}
 )
 
@@ -17,8 +16,7 @@ type UserInfoRepository struct {
 }
 
 func NewUserInfoRepository() *UserInfoRepository {
-	return &UserInfoRepository{
-	}
+	return &UserInfoRepository{}
 }
 
 func (u UserInfoRepository) Find(userID string) (*model.UserInfo, error) {

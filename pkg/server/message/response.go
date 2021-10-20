@@ -2,10 +2,14 @@ package message
 
 import "g-sig/pkg/domain/model"
 
+type JudgeMessageType struct {
+	Type string `json:"type"`
+}
+
 type RegisterResponse struct {
 	Type    string `json:"type"`
 	Message string `json:"message"`
-	UserID string `json:"userID"`
+	UserID  string `json:"userID"`
 }
 type UpdateResponse struct {
 	Type    string `json:"type"`
@@ -13,8 +17,8 @@ type UpdateResponse struct {
 }
 
 type SearchResponse struct {
-	Type    string `json:"type"`
-	Message string `json:"message"`
+	Type                string            `json:"type"`
+	Message             string            `json:"message"`
 	SurroundingUserList []*model.UserInfo `json:"surroundingUserList"`
 }
 

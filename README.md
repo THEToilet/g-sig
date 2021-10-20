@@ -29,6 +29,7 @@ project G-LocON using WebRTC
     - close
 
 ## 動作フロー
+
 ```text
 
   +----------------+ +----------------+
@@ -91,12 +92,12 @@ project G-LocON using WebRTC
           |                   |                 |                  |                  |
           |                   |                 |                  |                  |
 ```
+
 ## プログラム構成
 
 ## データ定義
 
-userIDはサーバ側で保持する方向にする
-コネクションが繋がっているから大丈夫
+userIDはサーバ側で保持する方向にする コネクションが繋がっているから大丈夫
 
 - client
 
@@ -115,23 +116,23 @@ type RegisterResponse = {
     userID: string
 }
 
-type UpdateResponse  = {
-    type :   string
+type UpdateResponse = {
+    type: string
     message: string
 }
 
 type DeleteResponse = {
-    type :   string
-    message: string 
+    type: string
+    message: string
 }
 
 type SendResponse = {
-    type :   string
+    type: string
     message: string
 }
 
 type JudgeMessageType = {
-    type :   string
+    type: string
 }
 //----------request----------
 
@@ -140,7 +141,7 @@ type PongReauest = {
 }
 
 type RegisterReguest = {
-     type: string
+    type: string
     geoLocation: GeoLocation
 }
 
@@ -160,11 +161,11 @@ type DeleteRequest = {
 }
 
 type SendRequest = {
-     type: string
-     message: string
+    type: string
+    message: string
 }
 //--------------------------
-    
+
 type GeoLocation = {
     latitude: number
     longitude: number
@@ -172,98 +173,120 @@ type GeoLocation = {
 
 type UserInfo = {
     userID: string
-    geoLocation : GeoLocation
+    geoLocation: GeoLocation
 }
 
 ```
 
 - server
 
-typeにはやり取りをするプロトコルを書く
-messageはエラーがある場合のみ書く
+typeにはやり取りをするプロトコルを書く messageはエラーがある場合のみ書く
+
 ```go
 
 
 type RegisterResponse struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
-    UserID string `json:"userID"`
+Type    string `json:"type"`
+Message string `json:"message"`
+UserID string `json:"userID"`
 }
 type UpdateResponse struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
+Type    string `json:"type"`
+Message string `json:"message"`
 }
 
 type SearchResponse struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
-    SurroundingUserList []*model.UserInfo `json:"surroundingUserList"`
+Type    string `json:"type"`
+Message string `json:"message"`
+SurroundingUserList []*model.UserInfo `json:"surroundingUserList"`
 }
 
 type DeleteResponse struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
+Type    string `json:"type"`
+Message string `json:"message"`
 }
 
 type SendResponse struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
+Type    string `json:"type"`
+Message string `json:"message"`
 }
 
 
 // --------------------------
 
 type JudgeMessageType struct {
-    Type string `json:"type"`
+Type string `json:"type"`
 }
 
 type RegisterRequest struct {
-    Type     string   `json:"type"`
-	GeoLocation GeoLocation `json:"geoLocation"`
+Type     string   `json:"type"`
+GeoLocation GeoLocation `json:"geoLocation"`
 }
 
 type UpdateRequest struct {
-    Type     string   `json:"type"`
-    GeoLocation GeoLocation `json:"geoLocation"`
+Type     string   `json:"type"`
+GeoLocation GeoLocation `json:"geoLocation"`
 }
 
 type SearchRequest struct {
-    Type           string   `json:"type"`
-    SearchType     string   `json:"searchType"`
-    SearchDistance float64  `json:"searchDistance"`
+Type           string   `json:"type"`
+SearchType     string   `json:"searchType"`
+SearchDistance float64  `json:"searchDistance"`
 }
 
 type DeleteRequest struct {
-    Type     string   `json:"type"`
+Type     string   `json:"type"`
 }
 
 type SendRequest struct {
-    Type    string `json:"type"`
-    Message string `json:"message"`
+Type    string `json:"type"`
+Message string `json:"message"`
 }
 
 // -------- model ---------------
 // User 永続化するユーザ情報
 type User struct {
-    UserID   string
-    UserName string
+UserID   string
+UserName string
 }
 
 // UserInfo ユーザの頻繁に変わる情報
 type UserInfo struct {
-    UserID      string  `json:"userID"`
-	GeoLocation GeoLocation `json:"geoLocation"`
+UserID      string  `json:"userID"`
+GeoLocation GeoLocation `json:"geoLocation"`
 }
 
 // GeoLocation ユーザの位置情報
 type GeoLocation struct {
-    Latitude  string `json:"latitude"`
-    Longitude string `json:"longitude"`
+Latitude  string `json:"latitude"`
+Longitude string `json:"longitude"`
 }
 ```
 
 - message
 
-```json
-
-```
+- ping-pong
+    - request
+      ```json
+        {"type": "ping"}    
+      ```
+    - response
+      ```json
+        {"type": "pong"} 
+      ```
+- register
+    - request
+      ```json
+        {
+          "type": "register", 
+          "geoLocation": 
+          {
+            "latitude": 12.123,
+            "longitude": 123.333
+          }
+        } 
+      ```
+    - response
+      ```json
+        {"type": "register", "userID": "123-21421-1241-24", "message": ""} 
+      ```

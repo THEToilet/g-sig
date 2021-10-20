@@ -15,7 +15,7 @@ type GeoLocation struct {
 // NewUserInfo 新しいUserInfoを生成したポインタを返す
 func NewUserInfo(userID string, latitude float64, longitude float64) *UserInfo {
 	return &UserInfo{
-		UserID:    userID,
+		UserID: userID,
 		GeoLocation: GeoLocation{
 			Latitude:  latitude,
 			Longitude: longitude,

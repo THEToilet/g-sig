@@ -41,8 +41,7 @@ func TestUserInfoRepository_Find(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := UserInfoRepository{
-			}
+			u := UserInfoRepository{}
 			// リポジトリに登録
 			err := u.Save(model.UserInfo{
 				UserID:    "1234-1234-1234",
@@ -86,8 +85,7 @@ func TestUserInfoRepository_FindAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := UserInfoRepository{
-			}
+			u := UserInfoRepository{}
 			_ = u.Save(model.UserInfo{
 				UserID:    "1",
 				Latitude:  0,
@@ -141,8 +139,7 @@ func TestUserInfoRepository_Save(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := UserInfoRepository{
-			}
+			u := UserInfoRepository{}
 			err := u.Save(tt.args.user)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
@@ -185,8 +182,7 @@ func TestUserInfoRepository_Update(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := UserInfoRepository{
-			}
+			u := UserInfoRepository{}
 			err := u.Save(model.UserInfo{
 				UserID:    "1234-1234",
 				Latitude:  0,
@@ -226,8 +222,7 @@ func TestUserInfoRepository_Delete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := UserInfoRepository{
-			}
+			u := UserInfoRepository{}
 			err := u.Save(model.UserInfo{
 				UserID:    "1111-1111",
 				Latitude:  0,

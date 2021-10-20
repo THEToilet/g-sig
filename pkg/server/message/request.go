@@ -2,7 +2,7 @@ package message
 
 import "g-sig/pkg/domain/model"
 
-type JudgeMessageType struct {
+type PingRequest struct {
 	Type string `json:"type"`
 }
 
@@ -12,14 +12,15 @@ type RegisterRequest struct {
 }
 
 type UpdateRequest struct {
-	Type        string            `json:"type"`
-	GeoLocation model.GeoLocation `json:"geoLocation"`
+	Type     string         `json:"type"`
+	UserInfo model.UserInfo `json:"userInfo"`
 }
 
 type SearchRequest struct {
-	Type           string  `json:"type"`
-	SearchType     string  `json:"searchType"`
-	SearchDistance float64 `json:"searchDistance"`
+	Type           string            `json:"type"`
+	SearchType     string            `json:"searchType"`
+	GeoLocation    model.GeoLocation `json:"geoLocation"`
+	SearchDistance float64           `json:"searchDistance"`
 }
 
 type DeleteRequest struct {

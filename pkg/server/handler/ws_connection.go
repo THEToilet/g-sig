@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"g-sig/pkg/domain/application"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/rs/zerolog"
@@ -57,14 +56,12 @@ L:
 		select {
 		case <-pingTimer.C:
 			w.logger.Info().Msg("ping")
-			// send ping message
-			/* TODO: 要リファクタリング */
-			status := w.makeStatusMessage("ping", "200", "please send pong")
-			responseMessage, err := json.Marshal(status)
+			requestMessage, err := w.makePingMessage()
 			if err != nil {
-				w.logger.Fatal().Err(err)
+				w.logger.Info().Msg("ping make error")
+				break L
 			}
-			if err := w.sendMessage(responseMessage); err != nil {
+			if err := w.sendMessage(requestMessage); err != nil {
 				break L
 			}
 			pongTimer.Reset(10 * time.Second)
