@@ -64,13 +64,13 @@ project G-LocON using WebRTC
           |                   |                 |                  |                  |
        xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxWebRTCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
           |                   +                 |                  |                  |
-          |   offer {type:offer,sdp:sdp}        |                  |                  |
-          +-------------------+---------------->|       offer {type:offer, sdp:sdp}   |
+          |   offer {type:offer,sdp:sdp , id : id}        |                  |                  |
+          +-------------------+---------------->|       offer {type:offer, sdp:sdp, id: id}   |
           |                   |                 +------------------+----------------->|
           |                   |                 |                  |                  |
-          |                   |                 |       answer {type:answer, sdp:sdp} |
+          |                   |                 |       answer {type:answer, sdp:sdp, id:id} |
           |                   |                 |<-----------------+------------------+
-          |   answer {type:answer, sdp:sdp}     |                  |                  |
+          |   answer {type:answer, sdp:sdp, id:id}     |                  |                  |
           |<------------------+-----------------+                  |                  |
           |                   |                 |                  |                  |
           |                   |                 |                  |                  |
@@ -290,3 +290,4 @@ Longitude string `json:"longitude"`
       ```json
         {"type": "register", "userID": "123-21421-1241-24", "message": ""} 
       ```
+

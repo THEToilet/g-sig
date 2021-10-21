@@ -34,6 +34,7 @@ func (s *SignalingUseCase) Delete(userID string) error {
 	return s.userInfoRepository.Delete(userID)
 }
 
+// TODO: リファクタリング
 func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
 	userInfoList := s.userInfoRepository.FindAll()
 	var searchedUserList []*model.UserInfo

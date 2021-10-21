@@ -192,6 +192,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 	case "search":
 
+		// TODO: ユーザを検索した際に誰も該当者がいないときの動作をもう少し考える
 		// 周囲端末検索
 		searchMessage := &respMessage.SearchRequest{}
 		if err := json.Unmarshal(rawMessage, &searchMessage); err != nil {
