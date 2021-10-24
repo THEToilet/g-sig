@@ -327,7 +327,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		}
 
 		// NOTE: ここでユーザIDを交換
-		responseMessage, err := w.makeOfferMessage(answerMessage.SDP, w.userID)
+		responseMessage, err := w.makeAnswerMessage(answerMessage.SDP, w.userID)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
