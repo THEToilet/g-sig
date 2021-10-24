@@ -11,7 +11,8 @@ import (
 
 func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *http.Server {
 	mux := http.NewServeMux()
-	signalingHandler := handler.NewSignalingHandler(signalingUseCase, logger)
+	connections := handler.NewConnections(logger)
+	signalingHandler := handler.NewSignalingHandler(signalingUseCase, connections, logger)
 
 	mux.HandleFunc("/signaling", signalingHandler.Signaling)
 	mux.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 	})
 	server := &http.Server{
 		//Addr:           ":8080",/
-		// ここ変えるならクライアントも変えなければならない
+		// MEMO: ここ変えるならクライアントも変えなければならない
 		Addr:           "127.0.0.1:8080",
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,

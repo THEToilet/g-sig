@@ -10,12 +10,14 @@ import (
 
 type signalingHandler struct {
 	signalingUseCase *application.SignalingUseCase
+	connections      *Connections
 	logger           *zerolog.Logger
 }
 
-func NewSignalingHandler(useCase *application.SignalingUseCase, logger *zerolog.Logger) *signalingHandler {
+func NewSignalingHandler(useCase *application.SignalingUseCase, connections *Connections, logger *zerolog.Logger) *signalingHandler {
 	return &signalingHandler{
 		signalingUseCase: useCase,
+		connections:      connections,
 		logger:           logger,
 	}
 }
@@ -29,12 +31,12 @@ func (h *signalingHandler) Signaling(writer http.ResponseWriter, request *http.R
 	h.logger.Info().Msg("Connection Start")
 	//h.logger.Debug().Caller().Msg("")
 
-	// goroutineのキャンセル処理に使う
+	// NOTE: goroutineのキャンセル処理に使う
 	ctx, cancel := context.WithCancel(context.Background())
 
 	receiveMessage := make(chan []byte, 100)
 	sendingMessage := make(chan []byte, 100)
-	wsConnection := NewWSConnection(conn, receiveMessage, sendingMessage, h.signalingUseCase, h.logger)
+	wsConnection := NewWSConnection(conn, receiveMessage, sendingMessage, h.signalingUseCase, h.connections, h.logger)
 	go wsConnection.selector(ctx, cancel)
 	go wsConnection.receiver(ctx)
 }

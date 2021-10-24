@@ -15,16 +15,18 @@ type WSConnection struct {
 	sendingMessage   chan []byte
 	signalingUseCase *application.SignalingUseCase
 	logger           *zerolog.Logger
+	connections      *Connections
 	isRegistered     bool
 	userID           string
 }
 
-func NewWSConnection(conn net.Conn, receiveMessage chan []byte, sendingMessage chan []byte, signalingUseCase *application.SignalingUseCase, logger *zerolog.Logger) *WSConnection {
+func NewWSConnection(conn net.Conn, receiveMessage chan []byte, sendingMessage chan []byte, signalingUseCase *application.SignalingUseCase, connections *Connections, logger *zerolog.Logger) *WSConnection {
 	return &WSConnection{
 		conn:             conn,
 		receiveMessage:   receiveMessage,
 		sendingMessage:   sendingMessage,
 		signalingUseCase: signalingUseCase,
+		connections:      connections,
 		logger:           logger,
 		isRegistered:     false,
 		userID:           "",
@@ -45,7 +47,7 @@ func (w *WSConnection) selector(ctx context.Context, cancel context.CancelFunc) 
 		// TODO　ここ呼ばれない
 		stopTimer(pongTimer)
 		pingTimer.Stop()
-		w.logger.Debug().Caller().Msg("ddddddd")
+		w.logger.Debug().Caller().Msg("selector is close")
 		w.signalingUseCase.Delete(w.userID)
 	}()
 
@@ -61,7 +63,7 @@ L:
 				w.logger.Info().Msg("ping make error")
 				break L
 			}
-			if err := w.sendMessage(requestMessage); err != nil {
+			if err := w.sendMessage(&w.conn, requestMessage); err != nil {
 				break L
 			}
 			pongTimer.Reset(10 * time.Second)
@@ -82,14 +84,14 @@ L:
 				break L
 			}
 			// クライアントへメッセージ送信
-			if err := w.sendMessage(msg); err != nil {
+			if err := w.sendMessage(&w.conn, msg); err != nil {
 				break L
 			}
 		}
 	}
 	// TODO サーバが死んだことによる
 	// TODO: エラーメッセージをクライアント側へ送る
-	if err := w.sendMessage([]byte{}); err != nil {
+	if err := w.sendMessage(&w.conn, []byte{}); err != nil {
 		w.logger.Debug().Msg("")
 		return
 	}

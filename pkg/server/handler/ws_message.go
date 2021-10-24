@@ -3,16 +3,17 @@ package handler
 import (
 	"encoding/json"
 	"g-sig/pkg/domain/model"
-	respMessage "g-sig/pkg/server/message"
+	mess "g-sig/pkg/server/message"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/google/uuid"
+	"net"
 	"time"
 )
 
 // 今はエラー用だけに使われている
 func (w *WSConnection) makeResponseMessage(message string, actionType string) ([]byte, error) {
-	status := respMessage.Response{
+	status := mess.Response{
 		Message: message,
 		Type:    actionType,
 	}
@@ -24,10 +25,10 @@ func (w *WSConnection) makeResponseMessage(message string, actionType string) ([
 	return responseMessage, nil
 }
 
-func (w *WSConnection) sendMessage(message []byte) error {
+func (w *WSConnection) sendMessage(conn *net.Conn, message []byte) error {
 	// TODO opCode要検討
 	w.logger.Debug().Msg(string(message))
-	if err := wsutil.WriteServerMessage(w.conn, ws.OpText, message); err != nil {
+	if err := wsutil.WriteServerMessage(*conn, ws.OpText, message); err != nil {
 		w.logger.Fatal().Err(err)
 		return err
 	}
@@ -35,7 +36,7 @@ func (w *WSConnection) sendMessage(message []byte) error {
 }
 
 func (w *WSConnection) makePingMessage() ([]byte, error) {
-	pingRequest := respMessage.PingRequest{
+	pingRequest := mess.PingRequest{
 		Type: "ping",
 	}
 	requestMessage, err := json.Marshal(pingRequest)
@@ -47,7 +48,7 @@ func (w *WSConnection) makePingMessage() ([]byte, error) {
 }
 
 func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
-	registerResponse := respMessage.RegisterResponse{
+	registerResponse := mess.RegisterResponse{
 		Type:   "register",
 		UserID: userID,
 	}
@@ -59,7 +60,7 @@ func (w *WSConnection) makeRegisterMessage(userID string) ([]byte, error) {
 	return responseMessage, nil
 }
 func (w *WSConnection) makeUpdateMessage() ([]byte, error) {
-	updateResponse := respMessage.UpdateResponse{
+	updateResponse := mess.UpdateResponse{
 		Type:    "update",
 		Message: "",
 	}
@@ -71,7 +72,7 @@ func (w *WSConnection) makeUpdateMessage() ([]byte, error) {
 	return responseMessage, nil
 }
 func (w *WSConnection) makeDeleteMessage() ([]byte, error) {
-	deleteResponse := respMessage.DeleteResponse{
+	deleteResponse := mess.DeleteResponse{
 		Type:    "delete",
 		Message: "",
 	}
@@ -83,7 +84,7 @@ func (w *WSConnection) makeDeleteMessage() ([]byte, error) {
 	return responseMessage, nil
 }
 func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo) ([]byte, error) {
-	searchResponse := respMessage.SearchResponse{
+	searchResponse := mess.SearchResponse{
 		Type:                "search",
 		Message:             "",
 		SurroundingUserList: searchedUserList,
@@ -97,7 +98,7 @@ func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo) ([]
 
 }
 func (w *WSConnection) makeSendMessage() ([]byte, error) {
-	sendResponse := respMessage.SendResponse{
+	sendResponse := mess.SendResponse{
 		Type:    "send",
 		Message: "",
 	}
@@ -108,9 +109,60 @@ func (w *WSConnection) makeSendMessage() ([]byte, error) {
 	}
 	return responseMessage, nil
 }
+func (w *WSConnection) makeOfferMessage(sdp string, destination string) ([]byte, error) {
+	offerResponse := mess.OfferMessage{
+		Type:        "offer",
+		SDP:         sdp,
+		Destination: destination,
+	}
+	responseMessage, err := json.Marshal(offerResponse)
+	if err != nil {
+		w.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return responseMessage, nil
+}
+func (w *WSConnection) makeAnswerMessage(sdp string, destination string) ([]byte, error) {
+	answerResponse := mess.AnswerMessage{
+		Type:        "answer",
+		SDP:         sdp,
+		Destination: destination,
+	}
+	responseMessage, err := json.Marshal(answerResponse)
+	if err != nil {
+		w.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return responseMessage, nil
+}
+func (w *WSConnection) makeCloseMessage(destination string) ([]byte, error) {
+	closeResponse := mess.CloseMessage{
+		Type:        "close",
+		Destination: destination,
+	}
+	responseMessage, err := json.Marshal(closeResponse)
+	if err != nil {
+		w.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return responseMessage, nil
+}
+func (w *WSConnection) makeIceMessage(ice string, destination string) ([]byte, error) {
+	iceResponse := mess.ICEMessage{
+		Type:        "ice",
+		ICE:         ice,
+		Destination: destination,
+	}
+	responseMessage, err := json.Marshal(iceResponse)
+	if err != nil {
+		w.logger.Fatal().Err(err)
+		return nil, err
+	}
+	return responseMessage, nil
+}
 
 func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
-	message := &respMessage.JudgeMessageType{}
+	message := &mess.JudgeMessageType{}
 	if err := json.Unmarshal(rawMessage, &message); err != nil {
 		w.logger.Fatal().Err(err)
 	}
@@ -119,8 +171,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	}
 
 	switch message.Type {
-	case "p2p":
-		// pWebRTCのシグナリングサーバとして動く
 	case "pong":
 		stopTimer(pongTimer)
 		pongTimer.Reset(time.Second * 10)
@@ -128,7 +178,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "register":
 
 		// userInfo登録
-		registerMessage := &respMessage.RegisterRequest{}
+		registerMessage := &mess.RegisterRequest{}
 		if err := json.Unmarshal(rawMessage, &registerMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -147,6 +197,8 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.isRegistered = true
 		w.userID = userID.String()
 
+		w.connections.Save(w.userID, &w.conn)
+
 		responseMessage, err := w.makeRegisterMessage(userID.String())
 
 		w.sendingMessage <- responseMessage
@@ -154,7 +206,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "update":
 
 		// userInfo更新
-		updateMessage := &respMessage.UpdateRequest{}
+		updateMessage := &mess.UpdateRequest{}
 		if err := json.Unmarshal(rawMessage, &updateMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -174,7 +226,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "delete":
 
 		// userInfo削除
-		deleteMessage := &respMessage.DeleteRequest{}
+		deleteMessage := &mess.DeleteRequest{}
 		if err := json.Unmarshal(rawMessage, &deleteMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -194,7 +246,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		// TODO: ユーザを検索した際に誰も該当者がいないときの動作をもう少し考える
 		// 周囲端末検索
-		searchMessage := &respMessage.SearchRequest{}
+		searchMessage := &mess.SearchRequest{}
 		if err := json.Unmarshal(rawMessage, &searchMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -224,7 +276,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 	case "send":
 
 		// 周囲に一斉送信
-		sendMessage := &respMessage.SendRequest{}
+		sendMessage := &mess.SendRequest{}
 		if err := json.Unmarshal(rawMessage, &sendMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -236,6 +288,93 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 		w.sendingMessage <- responseMessage
+
+	case "offer":
+		offerMessage := &mess.OfferMessage{}
+		w.logger.Info().Msg(offerMessage.Type)
+		if err := json.Unmarshal(rawMessage, &offerMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+		destinationConn, err := w.connections.Find(offerMessage.Destination)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+		w.logger.Info().Interface("destinationConn", destinationConn)
+		if destinationConn == nil {
+			w.logger.Info().Msg("destination is nil")
+			return
+		}
+
+		// NOTE: ここでユーザIDを交換
+		responseMessage, err := w.makeOfferMessage(offerMessage.SDP, w.userID)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+	case "answer":
+		answerMessage := &mess.AnswerMessage{}
+		w.logger.Info().Msg(answerMessage.Type)
+		if err := json.Unmarshal(rawMessage, &answerMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+		destinationConn, err := w.connections.Find(answerMessage.Destination)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		// NOTE: ここでユーザIDを交換
+		responseMessage, err := w.makeOfferMessage(answerMessage.SDP, w.userID)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+	case "ice":
+		iceMessage := &mess.ICEMessage{}
+		w.logger.Info().Msg(iceMessage.Type)
+		if err := json.Unmarshal(rawMessage, &iceMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+		destinationConn, err := w.connections.Find(iceMessage.Destination)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		// NOTE: ここでユーザIDを交換
+		responseMessage, err := w.makeIceMessage(iceMessage.ICE, w.userID)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+	case "close":
+		closeMessage := &mess.CloseMessage{}
+		w.logger.Info().Msg(closeMessage.Type)
+		if err := json.Unmarshal(rawMessage, &closeMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
+		destinationConn, err := w.connections.Find(closeMessage.Destination)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		// NOTE: ここでユーザIDを交換
+		responseMessage, err := w.makeCloseMessage(w.userID)
+		if err != nil {
+			w.logger.Fatal().Err(err)
+		}
+
+		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
+			w.logger.Fatal().Err(err)
+		}
 
 	default:
 		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid RequestType")
