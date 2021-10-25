@@ -45,7 +45,6 @@ type AnswerMessage struct {
 type ICEMessage struct {
 	Type        string `json:"type"`
 	ICE         string `json:"ice"`
-	Destination string `json:"destination"`
 }
 type CloseMessage struct {
 	Type        string `json:"type"`

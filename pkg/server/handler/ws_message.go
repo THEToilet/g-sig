@@ -147,11 +147,10 @@ func (w *WSConnection) makeCloseMessage(destination string) ([]byte, error) {
 	}
 	return responseMessage, nil
 }
-func (w *WSConnection) makeIceMessage(ice string, destination string) ([]byte, error) {
+func (w *WSConnection) makeIceMessage(ice string) ([]byte, error) {
 	iceResponse := mess.ICEMessage{
 		Type:        "ice",
 		ICE:         ice,
-		Destination: destination,
 	}
 	responseMessage, err := json.Marshal(iceResponse)
 	if err != nil {
@@ -305,6 +304,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			return
 		}
 
+		// NOTE: 相手のユーザIDを保存
+		w.destination = offerMessage.Destination
+
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeOfferMessage(offerMessage.SDP, w.userID)
 		if err != nil {
@@ -325,6 +327,13 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		if destinationConn == nil {
+			w.logger.Info().Msg("destination is nil")
+			return
+		}
+
+		// NOTE: 相手のユーザIDを保存
+		w.destination = answerMessage.Destination
 
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeAnswerMessage(answerMessage.SDP, w.userID)
@@ -341,13 +350,18 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err := json.Unmarshal(rawMessage, &iceMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		destinationConn, err := w.connections.Find(iceMessage.Destination)
+		w.logger.Info().Msg(w.destination)
+		destinationConn, err := w.connections.Find(w.destination)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		if destinationConn == nil {
+			w.logger.Info().Msg("destination is nil")
+			return
+		}
 
 		// NOTE: ここでユーザIDを交換
-		responseMessage, err := w.makeIceMessage(iceMessage.ICE, w.userID)
+		responseMessage, err := w.makeIceMessage(iceMessage.ICE)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}

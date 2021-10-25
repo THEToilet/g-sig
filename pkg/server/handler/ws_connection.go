@@ -18,6 +18,7 @@ type WSConnection struct {
 	connections      *Connections
 	isRegistered     bool
 	userID           string
+	destination      string
 }
 
 func NewWSConnection(conn net.Conn, receiveMessage chan []byte, sendingMessage chan []byte, signalingUseCase *application.SignalingUseCase, connections *Connections, logger *zerolog.Logger) *WSConnection {
@@ -30,6 +31,7 @@ func NewWSConnection(conn net.Conn, receiveMessage chan []byte, sendingMessage c
 		logger:           logger,
 		isRegistered:     false,
 		userID:           "",
+		destination:      "",
 	}
 }
 
