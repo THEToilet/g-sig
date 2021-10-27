@@ -361,8 +361,10 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			break
 		}
 
+		// XXX: ここ呼ばれない注意
 		w.logger.Info().Caller().Interface("iceMessage", iceMessage.ICE)
 
+		// TODO: この書き方よろしくないかも
 		if err = w.sendMessage(destinationConn, rawMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
