@@ -50,7 +50,9 @@ func (w *WSConnection) selector(ctx context.Context, cancel context.CancelFunc) 
 		stopTimer(pongTimer)
 		pingTimer.Stop()
 		w.logger.Debug().Caller().Msg("selector is close")
-		w.signalingUseCase.Delete(w.userID)
+		if err := w.signalingUseCase.Delete(w.userID); err != nil {
+			w.logger.Debug().Msg("Delete error")
+		}
 	}()
 
 	// TODO 疎通確認のping pong
@@ -80,7 +82,7 @@ L:
 			}
 			w.handleMessage(msg, pongTimer)
 		case msg, ok := <-w.sendingMessage:
-			w.logger.Info().Msg(string(msg))
+			w.logger.Info().Caller().Msg(string(msg))
 			if !ok {
 				w.logger.Fatal().Msg("")
 				break L
@@ -116,7 +118,7 @@ L:
 			w.logger.Fatal().Err(err)
 			break L
 		}
-		w.logger.Info().Msg(string(msg))
+		w.logger.Info().Caller().Msg(string(msg))
 		w.receiveMessage <- msg
 	}
 	<-ctx.Done()

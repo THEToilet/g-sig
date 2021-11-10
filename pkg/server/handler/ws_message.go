@@ -27,7 +27,7 @@ func (w *WSConnection) makeResponseMessage(message string, actionType string) ([
 
 func (w *WSConnection) sendMessage(conn *net.Conn, message []byte) error {
 	// TODO opCode要検討
-	w.logger.Debug().Msg(string(message))
+	w.logger.Debug().Caller().Msg(string(message))
 	if err := wsutil.WriteServerMessage(*conn, ws.OpText, message); err != nil {
 		w.logger.Fatal().Err(err)
 		return err
@@ -149,14 +149,15 @@ func (w *WSConnection) makeCloseMessage(destination string) ([]byte, error) {
 }
 func (w *WSConnection) makeIceMessage(ice string) ([]byte, error) {
 	iceResponse := mess.ICEMessage{
-		Type:        "ice",
-		ICE:         ice,
+		Type: "ice",
+		ICE:  ice,
 	}
 	responseMessage, err := json.Marshal(iceResponse)
 	if err != nil {
 		w.logger.Fatal().Err(err)
 		return nil, err
 	}
+	w.logger.Info().Caller().Interface("RESPONSE MESSAGE", responseMessage)
 	return responseMessage, nil
 }
 
@@ -346,27 +347,25 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		}
 	case "ice":
 		iceMessage := &mess.ICEMessage{}
-		w.logger.Info().Msg(iceMessage.Type)
 		if err := json.Unmarshal(rawMessage, &iceMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.logger.Info().Msg(w.destination)
+		w.logger.Info().Caller().Interface("senderID", w.userID).Msg("sssssssss")
+		w.logger.Info().Caller().Interface("destination", w.destination).Msg("------------")
 		destinationConn, err := w.connections.Find(w.destination)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
 		if destinationConn == nil {
-			w.logger.Info().Msg("destination is nil")
-			return
+			w.logger.Fatal().Msg("destination is nil")
+			break
 		}
 
-		// NOTE: ここでユーザIDを交換
-		responseMessage, err := w.makeIceMessage(iceMessage.ICE)
-		if err != nil {
-			w.logger.Fatal().Err(err)
-		}
+		// XXX: ここ呼ばれない注意
+		w.logger.Info().Caller().Interface("iceMessage", iceMessage.ICE)
 
-		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
+		// TODO: この書き方よろしくないかも
+		if err = w.sendMessage(destinationConn, rawMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
 	case "close":
