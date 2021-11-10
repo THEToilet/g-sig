@@ -31,7 +31,7 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 	server := &http.Server{
 		//Addr:           ":8080",/
 		// MEMO: ここ変えるならクライアントも変えなければならない
-		Addr:           "127.0.0.1:8080",
+		Addr:           ":8080",
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

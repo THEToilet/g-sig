@@ -61,8 +61,14 @@ func main() {
 	signalingUseCase := application.NewSignalingUseCase(userRepository, userInfoRepository, logger)
 
 	server := server.NewServer(signalingUseCase, logger)
-	if err := server.ListenAndServe(); err != nil {
-		logger.Fatal().Err(err)
+	if _, err := os.Stat("./../wss/server.crt"); err == nil {
+		if err := server.ListenAndServeTLS("./../wss/server.crt","private.key"); err != nil {
+			logger.Fatal().Err(err)
+		}
+	} else {
+		if err := server.ListenAndServe(); err != nil {
+			logger.Fatal().Err(err)
+		}
 	}
 	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
 }
