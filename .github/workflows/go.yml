@@ -25,12 +25,12 @@ jobs:
     - name: ssh key generate
       run: |
         mkdir -p ~/.ssh/
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/myvps
-        chmod 600 ~/.ssh/myvps
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
       
       # REFERENCE: https://kahoo.blog/github-actions-php-deploy/
       # -av でディレクトリを再帰的にコピー＆詳細出力
       # -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       # 警告メッセージを闇に消す
     - name: Deploy
-      run: rsync -av -e "ssh -i ~/.ssh/myvps -p ${{ secrets.SSH_PORT }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/toilet/g-sig"
+      run: rsync -av -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/toilet/g-sig"
