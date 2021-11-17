@@ -19,8 +19,8 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
+    #- name: Test
+    #  run: go test -v ./...
       
       # REFERENCE: https://kahoo.blog/github-actions-php-deploy/
       # -av でディレクトリを再帰的にコピー＆詳細出力
