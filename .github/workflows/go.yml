@@ -33,4 +33,4 @@ jobs:
       # -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       # 警告メッセージを闇に消す
     - name: Deploy
-      run: rsync -av -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/toilet/g-sig"
+      run: rsync -av -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " ./ "${{ secrets.SSH_USER_NAME }}@${{ secrets.SSH_HOST }}:/home/toilet/g-sig"
