@@ -24,9 +24,11 @@ func TestUserInfoRepository_Find(t *testing.T) {
 				userID: "1234-1234-1234",
 			},
 			want: &model.UserInfo{
-				UserID:    "1234-1234-1234",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1234-1234-1234",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			},
 			wantErr: nil,
 		},
@@ -44,9 +46,11 @@ func TestUserInfoRepository_Find(t *testing.T) {
 			u := UserInfoRepository{}
 			// リポジトリに登録
 			err := u.Save(model.UserInfo{
-				UserID:    "1234-1234-1234",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1234-1234-1234",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			got, err := u.Find(tt.args.userID)
 			if !errors.Is(err, tt.wantErr) {
@@ -71,14 +75,18 @@ func TestUserInfoRepository_FindAll(t *testing.T) {
 			name: "findAll_success",
 			want: []*model.UserInfo{
 				{
-					UserID:    "1",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "1",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 				{
-					UserID:    "2",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "2",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 		},
@@ -87,14 +95,18 @@ func TestUserInfoRepository_FindAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u := UserInfoRepository{}
 			_ = u.Save(model.UserInfo{
-				UserID:    "1",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			_ = u.Save(model.UserInfo{
-				UserID:    "2",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "2",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			got := u.FindAll()
 			if !cmp.Equal(got, tt.want) {
@@ -118,9 +130,11 @@ func TestUserInfoRepository_Save(t *testing.T) {
 			name: "save_success",
 			args: args{
 				user: model.UserInfo{
-					UserID:    "1234-1234",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "1234-1234",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: nil,
@@ -129,9 +143,11 @@ func TestUserInfoRepository_Save(t *testing.T) {
 			name: "save_error",
 			args: args{
 				user: model.UserInfo{
-					UserID:    "1234-1234",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "1234-1234",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: model.ErrUserAlreadyExisted,
@@ -161,9 +177,11 @@ func TestUserInfoRepository_Update(t *testing.T) {
 			name: "update_success",
 			args: args{
 				user: model.UserInfo{
-					UserID:    "1234-1234",
-					Latitude:  1,
-					Longitude: 1,
+					UserID: "1234-1234",
+					GeoLocation: model.GeoLocation{
+						Latitude:  1,
+						Longitude: 1,
+					},
 				},
 			},
 			wantErr: nil,
@@ -172,9 +190,11 @@ func TestUserInfoRepository_Update(t *testing.T) {
 			name: "update_error",
 			args: args{
 				user: model.UserInfo{
-					UserID:    "00000",
-					Latitude:  1,
-					Longitude: 1,
+					UserID: "00000",
+					GeoLocation: model.GeoLocation{
+						Latitude:  1,
+						Longitude: 1,
+					},
 				},
 			},
 			wantErr: model.ErrUserNotFound,
@@ -184,9 +204,11 @@ func TestUserInfoRepository_Update(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u := UserInfoRepository{}
 			err := u.Save(model.UserInfo{
-				UserID:    "1234-1234",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1234-1234",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			err = u.Update(tt.args.user)
 			if !errors.Is(err, tt.wantErr) {
@@ -224,9 +246,11 @@ func TestUserInfoRepository_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u := UserInfoRepository{}
 			err := u.Save(model.UserInfo{
-				UserID:    "1111-1111",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1111-1111",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			err = u.Delete(tt.args.userID)
 			if !errors.Is(err, tt.wantErr) {

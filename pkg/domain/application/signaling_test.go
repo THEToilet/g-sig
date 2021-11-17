@@ -67,9 +67,11 @@ func TestSignalingUseCase_Register(t *testing.T) {
 				logger:             &tt.fields.logger,
 			}
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "1234",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "1234",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			err := s.Register(tt.args.userID, tt.args.geoLocation)
 			if !errors.Is(err, tt.wantErr) {
@@ -105,9 +107,11 @@ func TestSignalingUseCase_Update(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "123-123",
-					Latitude:  1,
-					Longitude: 1,
+					UserID: "123-123",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: nil,
@@ -121,9 +125,11 @@ func TestSignalingUseCase_Update(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: model.ErrUserNotFound,
@@ -137,9 +143,11 @@ func TestSignalingUseCase_Update(t *testing.T) {
 				logger:             &tt.fields.logger,
 			}
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "123-123",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "123-123",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			err := s.Update(tt.args.userInfo)
 			if !errors.Is(err, tt.wantErr) {
@@ -174,9 +182,11 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "11-11",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "11-11",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: nil,
@@ -190,9 +200,11 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "00000000",
-					Latitude:  0,
-					Longitude: 0,
+					UserID: "00000000",
+					GeoLocation: model.GeoLocation{
+						Latitude:  0,
+						Longitude: 0,
+					},
 				},
 			},
 			wantErr: model.ErrUserNotFound,
@@ -206,9 +218,11 @@ func TestSignalingUseCase_Delete(t *testing.T) {
 				logger:             &tt.fields.logger,
 			}
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "11-11",
-				Latitude:  0,
-				Longitude: 0,
+				UserID: "11-11",
+				GeoLocation: model.GeoLocation{
+					Latitude:  0,
+					Longitude: 0,
+				},
 			})
 			err := s.Delete(tt.args.userInfo.UserID)
 			if !errors.Is(err, tt.wantErr) {
@@ -253,22 +267,28 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "123",
-					Latitude:  35.943218,
-					Longitude: 139.621248,
+					UserID: "123",
+					GeoLocation: model.GeoLocation{
+						Latitude:  35.943218,
+						Longitude: 139.621248,
+					},
 				},
 				searchDistance: 100,
 			},
 			want: []*model.UserInfo{
 				{
-					UserID:    "1101",
-					Latitude:  35.943250,
-					Longitude: 139.621090,
+					UserID: "1101",
+					GeoLocation: model.GeoLocation{
+						Latitude:  35.943250,
+						Longitude: 139.621090,
+					},
 				},
 				{
-					UserID:    "1102",
-					Latitude:  35.942769,
-					Longitude: 139.621478,
+					UserID: "1102",
+					GeoLocation: model.GeoLocation{
+						Latitude:  35.942769,
+						Longitude: 139.621478,
+					},
 				},
 			},
 		},
@@ -281,9 +301,11 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 			},
 			args: args{
 				userInfo: model.UserInfo{
-					UserID:    "123",
-					Latitude:  35.943218,
-					Longitude: 139.621248,
+					UserID: "123",
+					GeoLocation: model.GeoLocation{
+						Latitude:  35.943218,
+						Longitude: 139.621248,
+					},
 				},
 				searchDistance: 0,
 			},
@@ -298,21 +320,27 @@ func TestSignalingUseCase_StaticSearch(t *testing.T) {
 				logger:             &tt.fields.logger,
 			}
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "1101",
-				Latitude:  35.943250,
-				Longitude: 139.621090,
+				UserID: "1101",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.943250,
+					Longitude: 139.621090,
+				},
 			})
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "1102",
-				Latitude:  35.942769,
-				Longitude: 139.621478,
+				UserID: "1102",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.942769,
+					Longitude: 139.621478,
+				},
 			})
 			tt.fields.userInfoRepository.Save(model.UserInfo{
-				UserID:    "1103",
-				Latitude:  35.942225,
-				Longitude: 139.617875,
+				UserID: "1103",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.942225,
+					Longitude: 139.617875,
+				},
 			})
-			got := s.StaticSearch(tt.args.userInfo, tt.args.searchDistance)
+			got := s.StaticSearch(tt.args.userInfo.UserID, tt.args.userInfo.GeoLocation, tt.args.searchDistance)
 			if !cmp.Equal(got, tt.want) {
 				t.Errorf("FindAll() got = %v, want %v", got, tt.want)
 				t.Errorf("FindAll() diff = %v", cmp.Diff(tt.want, got))
