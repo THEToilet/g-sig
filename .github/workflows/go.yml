@@ -1,0 +1,30 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+      
+      # REFERENCE: https://kahoo.blog/github-actions-php-deploy/
+      # -av でディレクトリを再帰的にコピー＆詳細出力
+      # -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      # 警告メッセージを闇に消す
+    - name: Deploy
+      run: rsync -av -e "ssh -p ${{ secrets.SSH_PORT }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no " ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/toilet/g-sig
