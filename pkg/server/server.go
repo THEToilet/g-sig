@@ -29,8 +29,8 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 		logger.Info().Msg(" /stun Access is Successful")
 	})
 	server := &http.Server{
-		//Addr:           ":8080",/
-		// MEMO: ここ変えるならクライアントも変えなければならない
+		// NOTE: ここ変えるならクライアントも変えなければならない
+		// NOTE: 127.0.0.1 では繋がらないが、localhostは繋がる
 		Addr:           ":8080",
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,

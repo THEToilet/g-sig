@@ -34,7 +34,7 @@ func (s *SignalingUseCase) Delete(userID string) error {
 	return s.userInfoRepository.Delete(userID)
 }
 
-// TODO: リファクタリング
+// StaticSearch TODO: リファクタリング
 func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
 	userInfoList := s.userInfoRepository.FindAll()
 	var searchedUserList []*model.UserInfo
@@ -47,7 +47,9 @@ func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLoca
 			}
 		}
 	}
-	return searchedUserList
+	// XXX: debug
+	//return searchedUserList
+	return userInfoList
 }
 
 func (s *SignalingUseCase) DynamicSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
