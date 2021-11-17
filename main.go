@@ -62,7 +62,7 @@ func main() {
 
 	server := server.NewServer(signalingUseCase, logger)
 	if _, err := os.Stat("./../wss/server.crt"); err == nil {
-		if err := server.ListenAndServeTLS("./../wss/server.crt","private.key"); err != nil {
+		if err := server.ListenAndServeTLS("./../wss/server.crt","./../wss/private.key"); err != nil {
 			logger.Fatal().Err(err)
 		}
 	} else {
