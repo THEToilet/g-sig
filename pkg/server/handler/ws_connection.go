@@ -48,6 +48,7 @@ func (w *WSConnection) selector(ctx context.Context, cancel context.CancelFunc) 
 	defer func() {
 		// TODO　ここ呼ばれない
 		stopTimer(pongTimer)
+		w.isRegistered = false
 		pingTimer.Stop()
 		w.logger.Debug().Caller().Msg("selector is close")
 		if err := w.signalingUseCase.Delete(w.userID); err != nil {

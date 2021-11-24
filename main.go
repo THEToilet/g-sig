@@ -22,7 +22,7 @@ var (
 
 func init() {
 
-	file, err := os.Open("config.conf")
+	file, err := os.Open("g-sig.conf")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,6 +61,9 @@ func main() {
 	signalingUseCase := application.NewSignalingUseCase(userRepository, userInfoRepository, logger)
 
 	server := server.NewServer(signalingUseCase, logger)
+
+	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
+
 	if _, err := os.Stat("./../wss/server.crt"); err == nil {
 		if err := server.ListenAndServeTLS("./../wss/server.crt","./../wss/private.key"); err != nil {
 			logger.Fatal().Err(err)
@@ -70,5 +73,4 @@ func main() {
 			logger.Fatal().Err(err)
 		}
 	}
-	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
 }
