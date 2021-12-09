@@ -48,8 +48,8 @@ func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLoca
 		}
 	}
 	// XXX: debug
-	return searchedUserList
-	//return userInfoList
+	//return searchedUserList
+	return userInfoList
 }
 
 func (s *SignalingUseCase) DynamicSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {

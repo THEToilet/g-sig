@@ -263,45 +263,49 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Info().Msg("invalid type")
 		}
 
+		w.logger.Debug().Interface("userInfoList", searchedUserList).Msg("")
+
 		if searchedUserList == nil {
 			searchedUserList = append(searchedUserList, &model.UserInfo{})
 		}
 
-		searchedUserList = append(searchedUserList, &model.UserInfo{
-			UserID: "1234-1234",
-			GeoLocation: model.GeoLocation{
-				Latitude:  35.950732,
-				Longitude: 139.7516601,
-			},
-		})
-		searchedUserList = append(searchedUserList, &model.UserInfo{
-			UserID: "1234-1234-1",
-			GeoLocation: model.GeoLocation{
-				Latitude:  35.850732,
-				Longitude: 139.6516601,
-			},
-		})
-		searchedUserList = append(searchedUserList, &model.UserInfo{
-			UserID: "1234-1234-2",
-			GeoLocation: model.GeoLocation{
-				Latitude:  35.952732,
-				Longitude: 139.6416601,
-			},
-		})
-		searchedUserList = append(searchedUserList, &model.UserInfo{
-			UserID: "1234-1234-3",
-			GeoLocation: model.GeoLocation{
-				Latitude:  35.953732,
-				Longitude: 139.6546601,
-			},
-		})
-		searchedUserList = append(searchedUserList, &model.UserInfo{
-			UserID: "1234-1234-4",
-			GeoLocation: model.GeoLocation{
-				Latitude:  35.958732,
-				Longitude: 139.6517601,
-			},
-		})
+		/*
+			searchedUserList = append(searchedUserList, &model.UserInfo{
+				UserID: "1234-1234",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.950732,
+					Longitude: 139.7516601,
+				},
+			})
+			searchedUserList = append(searchedUserList, &model.UserInfo{
+				UserID: "1234-1234-1",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.850732,
+					Longitude: 139.6516601,
+				},
+			})
+			searchedUserList = append(searchedUserList, &model.UserInfo{
+				UserID: "1234-1234-2",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.952732,
+					Longitude: 139.6416601,
+				},
+			})
+			searchedUserList = append(searchedUserList, &model.UserInfo{
+				UserID: "1234-1234-3",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.953732,
+					Longitude: 139.6546601,
+				},
+			})
+			searchedUserList = append(searchedUserList, &model.UserInfo{
+				UserID: "1234-1234-4",
+				GeoLocation: model.GeoLocation{
+					Latitude:  35.958732,
+					Longitude: 139.6517601,
+				},
+			})
+		*/
 
 		responseMessage, err := w.makeSearchMessage(searchedUserList)
 
