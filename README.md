@@ -1,3 +1,4 @@
+[![Go](https://github.com/THEToilet/g-sig/actions/workflows/go.yml/badge.svg?event=push)](https://github.com/THEToilet/g-sig/actions/workflows/go.yml)
 # g-sig
 
 project G-LocON using WebRTC
