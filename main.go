@@ -66,11 +66,11 @@ func main() {
 
 	if _, err := os.Stat(con.Cert); err == nil {
 		if err := server.ListenAndServeTLS(con.Cert, con.Key); err != nil {
-			logger.Fatal().Err(err)
+			logger.Fatal().Err(err).Msg("wss error")
 		}
 	} else {
 		if err := server.ListenAndServe(); err != nil {
-			logger.Fatal().Err(err)
+			logger.Fatal().Err(err).Msg("ws error")
 		}
 	}
 }
