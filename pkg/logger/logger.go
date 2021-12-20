@@ -4,18 +4,35 @@ import (
 	"fmt"
 	"g-sig/pkg/config"
 	"github.com/rs/zerolog"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
 	"os"
 	"strings"
 	"time"
 )
 
 func NewLogger(config *config.Config) (*zerolog.Logger, error) {
+
+	writer := &lumberjack.Logger{
+		Filename: "log/" + time.Now().Format("2006-01-02-1504") + ".log",
+		// NOTE: Mb
+		MaxSize: 0,
+		// NOTE: 日
+		MaxAge:     1,
+		MaxBackups: 0,
+		LocalTime:  false,
+		Compress:   true,
+	}
+
 	// Debugモードでなければ自動的にInfoモードになる
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if isDebug(config.LogInfo.Level) {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
-	logger := zerolog.New(customFormat()).With().Timestamp().Logger()
+
+	// NOTE: ログの出力を標準出力とファイルにする
+	writers := io.MultiWriter(customFormat(), writer)
+	logger := zerolog.New(writers).With().Timestamp().Logger()
 	return &logger, nil
 }
 
