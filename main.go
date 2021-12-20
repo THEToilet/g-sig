@@ -65,10 +65,12 @@ func main() {
 	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
 
 	if _, err := os.Stat(con.Cert); err == nil {
+		logger.Info().Str("type", "wss").Msg("wss server start")
 		if err := server.ListenAndServeTLS(con.Cert, con.Key); err != nil {
 			logger.Fatal().Err(err).Msg("wss error")
 		}
 	} else {
+		logger.Info().Str("type", "ws").Msg("ws server start")
 		if err := server.ListenAndServe(); err != nil {
 			logger.Fatal().Err(err).Msg("ws error")
 		}
