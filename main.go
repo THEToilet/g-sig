@@ -17,7 +17,7 @@ import (
 var (
 	version = "0.1.0"
 	logger  *zerolog.Logger
-	//config config.Config
+	con     *config.Config
 )
 
 func init() {
@@ -32,16 +32,16 @@ func init() {
 		log.Fatal(err)
 	}
 
-	config := config.NewConfig(buffer)
-	fmt.Println(config)
+	con = config.NewConfig(buffer)
+	fmt.Println(con)
 
-	logger, err = logger2.NewLogger(config)
+	logger, err = logger2.NewLogger(con)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logger.Info().Str("Title", config.Title).Msg("Config")
-	logger.Info().Str("LogLevel", config.LogInfo.Level).Msg("Config")
+	logger.Info().Str("Title", con.Title).Msg("Config")
+	logger.Info().Str("LogLevel", con.LogInfo.Level).Msg("Config")
 }
 
 func main() {
@@ -64,8 +64,8 @@ func main() {
 
 	logger.Info().Str("Addr", ":8080").Msg("Serve is running")
 
-	if _, err := os.Stat("./../wss/server.crt"); err == nil {
-		if err := server.ListenAndServeTLS("./../wss/server.crt","./../wss/private.key"); err != nil {
+	if _, err := os.Stat(con.Cert); err == nil {
+		if err := server.ListenAndServeTLS(con.Cert, con.Key); err != nil {
 			logger.Fatal().Err(err)
 		}
 	} else {
