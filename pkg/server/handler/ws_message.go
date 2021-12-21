@@ -211,6 +211,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 		w.logger.Info().Msg("update")
+		w.logger.Debug().Interface("updateMessage.UserInfo", updateMessage.UserInfo.GeoLocation).Msg("check")
 		err := w.signalingUseCase.Update(updateMessage.UserInfo)
 		if err != nil {
 			return
