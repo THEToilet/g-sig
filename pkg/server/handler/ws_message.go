@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"g-sig/pkg/domain/model"
 	mess "g-sig/pkg/server/message"
@@ -170,11 +171,14 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.logger.Fatal()
 	}
 
+	w.logger.Info().Interface("receivePacket", message).Interface("userID", w.userID).Interface("receivePacketBinarySize", binary.Size(message)).Interface("MessageType", message.Type).Msg("MESSAGE-RECEIVE-LOG")
+
 	switch message.Type {
 	case "pong":
 		stopTimer(pongTimer)
 		pongTimer.Reset(time.Second * 10)
 		w.logger.Info().Msg("pong")
+
 	case "register":
 
 		// userInfo登録
@@ -201,6 +205,8 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		responseMessage, err := w.makeRegisterMessage(userID.String())
 
+		w.logger.Info().Interface("REGISTER", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Msg("RECEIVE-REGISTER-MESSAGE")
+
 		w.sendingMessage <- responseMessage
 
 	case "update":
@@ -221,6 +227,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		w.logger.Info().Interface("UPDATE", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("UpdateMessageUserInfo", updateMessage.UserInfo) .Msg("RECEIVE-UPDATE-MESSAGE")
 
 		w.sendingMessage <- responseMessage
 
@@ -241,6 +248,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		w.logger.Info().Interface("DELETE", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Msg("RECEIVE-DELETE-MESSAGE")
 		w.sendingMessage <- responseMessage
 
 	case "search":
@@ -269,46 +277,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if searchedUserList == nil {
 			searchedUserList = append(searchedUserList, &model.UserInfo{})
 		}
-
-		/*
-			searchedUserList = append(searchedUserList, &model.UserInfo{
-				UserID: "1234-1234",
-				GeoLocation: model.GeoLocation{
-					Latitude:  35.950732,
-					Longitude: 139.7516601,
-				},
-			})
-			searchedUserList = append(searchedUserList, &model.UserInfo{
-				UserID: "1234-1234-1",
-				GeoLocation: model.GeoLocation{
-					Latitude:  35.850732,
-					Longitude: 139.6516601,
-				},
-			})
-			searchedUserList = append(searchedUserList, &model.UserInfo{
-				UserID: "1234-1234-2",
-				GeoLocation: model.GeoLocation{
-					Latitude:  35.952732,
-					Longitude: 139.6416601,
-				},
-			})
-			searchedUserList = append(searchedUserList, &model.UserInfo{
-				UserID: "1234-1234-3",
-				GeoLocation: model.GeoLocation{
-					Latitude:  35.953732,
-					Longitude: 139.6546601,
-				},
-			})
-			searchedUserList = append(searchedUserList, &model.UserInfo{
-				UserID: "1234-1234-4",
-				GeoLocation: model.GeoLocation{
-					Latitude:  35.958732,
-					Longitude: 139.6517601,
-				},
-			})
-		*/
-
 		responseMessage, err := w.makeSearchMessage(searchedUserList)
+
+		w.logger.Info().Interface("SEARCH", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("userInfoList",len(searchedUserList)).Interface("userInfoList",searchedUserList ).Interface("searchType", searchMessage.SearchType).Msg("RECEIVE-SEARCH-MESSAGE")
 
 		if err != nil {
 			w.logger.Fatal().Err(err)
@@ -325,10 +296,12 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.logger.Info().Msg("send")
 		w.signalingUseCase.Send()
 
+
 		responseMessage, err := w.makeSendMessage()
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		w.logger.Info().Interface("SEND", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("sendMessage", sendMessage.Message).Msg("RECEIVE-SEND-MESSAGE")
 		w.sendingMessage <- responseMessage
 
 	case "offer":
@@ -350,11 +323,13 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		// NOTE: 相手のユーザIDを保存
 		w.destination = offerMessage.Destination
 
+
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeOfferMessage(offerMessage.SDP, w.userID)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		w.logger.Info().Interface("OFFER", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("Destination", offerMessage.Destination).Msg("RECEIVE-OFFER-MESSAGE")
 
 		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
 			w.logger.Fatal().Err(err)
@@ -384,6 +359,8 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 
+		w.logger.Info().Interface("ANSWER", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("Destination", answerMessage.Destination).Msg("RECEIVE-ANSWER-MESSAGE")
+
 		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
@@ -392,7 +369,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err := json.Unmarshal(rawMessage, &iceMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.logger.Info().Caller().Interface("senderID", w.userID).Msg("sssssssss")
+		w.logger.Info().Caller().Interface("senderID", w.userID).Msg("")
 		w.logger.Info().Caller().Interface("destination", w.destination).Msg("------------")
 		destinationConn, err := w.connections.Find(w.destination)
 		if err != nil {
@@ -402,6 +379,8 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Msg("destination is nil")
 			break
 		}
+
+		w.logger.Info().Interface("ICE", message.Type).Interface("userID", w.userID).Interface("iceMessageByte", binary.Size(iceMessage)).Msg("RECEIVE-ICE-MESSAGE")
 
 		// XXX: ここ呼ばれない注意
 		w.logger.Info().Caller().Interface("iceMessage", iceMessage.ICE)
@@ -421,23 +400,25 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 			w.logger.Fatal().Err(err)
 		}
 
+
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeCloseMessage(w.userID)
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
 
+		w.logger.Info().Interface("CLOSE", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Msg("RECEIVE-CLOSE-MESSAGE")
+
 		if err = w.sendMessage(destinationConn, responseMessage); err != nil {
 			w.logger.Fatal().Err(err)
 		}
 
 	default:
-		w.logger.Debug().Interface("rawMessage", rawMessage).Msg("Invalid RequestType")
-
 		responseMessage, err := w.makeResponseMessage("Invalid RequestType", "undefined")
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
+		w.logger.Debug().Interface("rawMessage", rawMessage).Interface("userID", w.userID).Interface("responseMessageSize", binary.Size(responseMessage)).Msg("INVALID-REQUEST-TYPE")
 		w.sendingMessage <- responseMessage
 	}
 }

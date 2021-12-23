@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/binary"
 	"g-sig/pkg/domain/application"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/rs/zerolog"
@@ -68,6 +69,7 @@ L:
 				w.logger.Info().Msg("ping make error")
 				break L
 			}
+			w.logger.Info().Interface("sendData", requestMessage).Interface("sendBinaryData", binary.Size(requestMessage)).Interface("userID", w.userID).Msg("SEND-PONG-LOG")
 			if err := w.sendMessage(&w.conn, requestMessage); err != nil {
 				break L
 			}
@@ -88,6 +90,7 @@ L:
 				w.logger.Fatal().Msg("")
 				break L
 			}
+			w.logger.Info().Interface("sendData", msg).Interface("sendBinaryData", binary.Size(msg)).Interface("userID", w.userID).Msg("SEND-MESSAGE-LOG")
 			// クライアントへメッセージ送信
 			if err := w.sendMessage(&w.conn, msg); err != nil {
 				break L
