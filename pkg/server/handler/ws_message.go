@@ -274,9 +274,12 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		w.logger.Debug().Interface("userInfoList", searchedUserList).Msg("")
 
+		/*
 		if searchedUserList == nil {
 			searchedUserList = append(searchedUserList, &model.UserInfo{})
 		}
+		 */
+
 		responseMessage, err := w.makeSearchMessage(searchedUserList)
 
 		w.logger.Info().Interface("SEARCH", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("userInfoList",len(searchedUserList)).Interface("userInfoList",searchedUserList ).Interface("searchType", searchMessage.SearchType).Msg("RECEIVE-SEARCH-MESSAGE")

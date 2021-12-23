@@ -37,19 +37,18 @@ func (s *SignalingUseCase) Delete(userID string) error {
 // StaticSearch TODO: リファクタリング
 func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
 	userInfoList := s.userInfoRepository.FindAll()
-	var searchedUserList []*model.UserInfo
+	// NOTE: var searchedUserList []*model.UserInfo だとjson.Marshallでjsonがnullになる
+	searchedUserList := make([]*model.UserInfo, 0)
 	for _, v := range userInfoList {
-		//fmt.Println ("2点間", userInfo.Latitude, userInfo.Longitude, v.Latitude, v.Longitude)
-		//fmt.Println("2点間の距離", 1000*6371*math.Acos(math.Cos(userInfo.Latitude*math.Pi/180)*math.Cos(v.Latitude*math.Pi/180)*math.Cos(v.Longitude*math.Pi/180-userInfo.Longitude*math.Pi/180)+math.Sin(userInfo.Latitude*math.Pi/180)*math.Sin(v.Latitude*math.Pi/180)))
-		if 1000*6371*math.Acos(math.Cos(geoLocation.Latitude*math.Pi/180)*math.Cos(v.GeoLocation.Latitude*math.Pi/180)*math.Cos(v.GeoLocation.Longitude*math.Pi/180-geoLocation.Longitude*math.Pi/180)+math.Sin(geoLocation.Latitude*math.Pi/180)*math.Sin(v.GeoLocation.Latitude*math.Pi/180)) <= searchDistance {
+		s.logger.Debug().Interface("my-x", geoLocation.Latitude).Interface("my-y", geoLocation.Longitude).Interface("opponent-x", v.GeoLocation.Latitude).Interface("opponent-y", v.GeoLocation.Longitude).Msg("TwoPoints")
+		s.logger.Debug().Interface("2点間の距離", s.TwoPointsDistance(geoLocation, v.GeoLocation)).Msg("Distance")
+		if s.TwoPointsDistance(geoLocation, v.GeoLocation) <= searchDistance {
 			if v.UserID != userID {
 				searchedUserList = append(searchedUserList, v)
 			}
 		}
 	}
-	// XXX: debug
-	//return searchedUserList
-	return userInfoList
+	return searchedUserList
 }
 
 func (s *SignalingUseCase) DynamicSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
@@ -59,4 +58,8 @@ func (s *SignalingUseCase) DynamicSearch(userID string, geoLocation model.GeoLoc
 }
 
 func (s *SignalingUseCase) Send() {
+}
+
+func (s *SignalingUseCase) TwoPointsDistance(geoLocation model.GeoLocation, v model.GeoLocation) float64 {
+	return 1000 * 6371 * math.Acos(math.Cos(geoLocation.Latitude*math.Pi/180)*math.Cos(v.Latitude*math.Pi/180)*math.Cos(v.Longitude*math.Pi/180-geoLocation.Longitude*math.Pi/180)+math.Sin(geoLocation.Latitude*math.Pi/180)*math.Sin(v.Latitude*math.Pi/180))
 }
