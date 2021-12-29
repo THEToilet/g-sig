@@ -171,13 +171,14 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		w.logger.Fatal()
 	}
 
-	w.logger.Info().Interface("receivePacket", message).Interface("userID", w.userID).Interface("receivePacketBinarySize", binary.Size(message)).Interface("MessageType", message.Type).Msg("MESSAGE-RECEIVE-LOG")
+	w.logger.Info().Interface("receivePacket", rawMessage).Interface("userID", w.userID).Interface("receivePacketBinarySize", binary.Size(rawMessage)).Interface("MessageType", message.Type).Msg("MESSAGE-RECEIVE-LOG")
 
 	switch message.Type {
 	case "pong":
 		stopTimer(pongTimer)
 		pongTimer.Reset(time.Second * 10)
 		w.logger.Info().Msg("pong")
+		w.logger.Info().Interface("PONG", message.Type).Interface("userID", w.userID).Msg("RECEIVE-PONG-MESSAGE")
 
 	case "register":
 
