@@ -40,8 +40,8 @@ func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLoca
 	// NOTE: var searchedUserList []*model.UserInfo だとjson.Marshallでjsonがnullになる
 	searchedUserList := make([]*model.UserInfo, 0)
 	for _, v := range userInfoList {
-		s.logger.Debug().Interface("my-x", geoLocation.Latitude).Interface("my-y", geoLocation.Longitude).Interface("opponent-x", v.GeoLocation.Latitude).Interface("opponent-y", v.GeoLocation.Longitude).Msg("TwoPoints")
-		s.logger.Debug().Interface("2点間の距離", s.TwoPointsDistance(geoLocation, v.GeoLocation)).Msg("Distance")
+		//s.logger.Debug().Interface("my-x", geoLocation.Latitude).Interface("my-y", geoLocation.Longitude).Interface("opponent-x", v.GeoLocation.Latitude).Interface("opponent-y", v.GeoLocation.Longitude).Msg("TwoPoints")
+		//s.logger.Debug().Interface("2点間の距離", s.TwoPointsDistance(geoLocation, v.GeoLocation)).Msg("Distance")
 		if s.TwoPointsDistance(geoLocation, v.GeoLocation) <= searchDistance {
 			if v.UserID != userID {
 				searchedUserList = append(searchedUserList, v)
