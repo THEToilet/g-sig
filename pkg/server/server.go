@@ -33,8 +33,8 @@ func NewServer(signalingUseCase *application.SignalingUseCase, logger *zerolog.L
 		// NOTE: 127.0.0.1 では繋がらないが、localhostは繋がる
 		Addr:           ":8080",
 		Handler:        mux,
-		ReadTimeout:    20 * time.Second,
-		WriteTimeout:   20 * time.Second,
+		ReadTimeout:    120 * time.Second,
+		WriteTimeout:   120 * time.Second,
 		IdleTimeout:    120 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
