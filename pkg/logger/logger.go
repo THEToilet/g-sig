@@ -5,6 +5,7 @@ import (
 	"g-sig/pkg/config"
 	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -30,8 +31,7 @@ func NewLogger(config *config.Config) (*zerolog.Logger, error) {
 	}
 
 	// NOTE: ログの出力を標準出力とファイルにする
-	//writers := io.MultiWriter(customFormat(), writer)
-	writers := writer
+	writers := io.MultiWriter(customFormat(), writer)
 	logger := zerolog.New(writers).With().Timestamp().Logger()
 	zerolog.TimeFieldFormat = "2006/01/02 15:04:05.000"
 	return &logger, nil
