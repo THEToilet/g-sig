@@ -254,7 +254,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 	case "search":
 
-		// TODO: ユーザを検索した際に誰も該当者がいないときの動作をもう少し考える
 		// 周囲端末検索
 		searchMessage := &mess.SearchRequest{}
 		if err := json.Unmarshal(rawMessage, &searchMessage); err != nil {
@@ -274,12 +273,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		}
 
 		w.logger.Debug().Interface("userInfoList", searchedUserList).Msg("")
-
-		/*
-		if searchedUserList == nil {
-			searchedUserList = append(searchedUserList, &model.UserInfo{})
-		}
-		 */
 
 		responseMessage, err := w.makeSearchMessage(searchedUserList)
 
