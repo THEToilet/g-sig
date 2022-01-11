@@ -37,7 +37,7 @@ func (s *SignalingUseCase) Delete(userID string) error {
 // StaticSearch TODO: リファクタリング
 func (s *SignalingUseCase) StaticSearch(userID string, geoLocation model.GeoLocation, searchDistance float64) []*model.UserInfo {
 	userInfoList := s.userInfoRepository.FindAll()
-	// NOTE: var searchedUserList []*model.UserInfo だとjson.Marshallでjsonがnullになる
+	// NOTE: var searchedUserList []*model.UserInfo だとjson.Marshallでjsonがnullになるので変更した
 	searchedUserList := make([]*model.UserInfo, 0)
 	for _, v := range userInfoList {
 		//s.logger.Debug().Interface("my-x", geoLocation.Latitude).Interface("my-y", geoLocation.Longitude).Interface("opponent-x", v.GeoLocation.Latitude).Interface("opponent-y", v.GeoLocation.Longitude).Msg("TwoPoints")
