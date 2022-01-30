@@ -21,6 +21,7 @@ type SearchRequest struct {
 	SearchType     string            `json:"searchType"`
 	GeoLocation    model.GeoLocation `json:"geoLocation"`
 	SearchDistance float64           `json:"searchDistance"`
+	RequestID      string            `json:"requestID"`
 }
 
 type DeleteRequest struct {
@@ -45,8 +46,8 @@ type AnswerMessage struct {
 }
 
 type ICEMessage struct {
-	Type        string `json:"type"`
-	ICE         string `json:"ice"`
+	Type string `json:"type"`
+	ICE  string `json:"ice"`
 }
 
 type CloseMessage struct {

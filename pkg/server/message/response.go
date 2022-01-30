@@ -20,6 +20,7 @@ type SearchResponse struct {
 	Type                string            `json:"type"`
 	Message             string            `json:"message"`
 	SurroundingUserList []*model.UserInfo `json:"surroundingUserList"`
+	ResponseID          string            `json:"responseID"`
 }
 
 type DeleteResponse struct {

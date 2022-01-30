@@ -84,11 +84,12 @@ func (w *WSConnection) makeDeleteMessage() ([]byte, error) {
 	}
 	return responseMessage, nil
 }
-func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo) ([]byte, error) {
+func (w *WSConnection) makeSearchMessage(searchedUserList []*model.UserInfo, requestID string) ([]byte, error) {
 	searchResponse := mess.SearchResponse{
 		Type:                "search",
 		Message:             "",
 		SurroundingUserList: searchedUserList,
+		ResponseID:          requestID,
 	}
 	responseMessage, err := json.Marshal(searchResponse)
 	if err != nil {
@@ -228,7 +229,7 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-		w.logger.Info().Interface("UPDATE", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("UpdateMessageUserInfo", updateMessage.UserInfo) .Msg("RECEIVE-UPDATE-MESSAGE")
+		w.logger.Info().Interface("UPDATE", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("UpdateMessageUserInfo", updateMessage.UserInfo).Msg("RECEIVE-UPDATE-MESSAGE")
 
 		w.sendingMessage <- responseMessage
 
@@ -274,9 +275,9 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		w.logger.Debug().Interface("userInfoList", searchedUserList).Msg("")
 
-		responseMessage, err := w.makeSearchMessage(searchedUserList)
+		responseMessage, err := w.makeSearchMessage(searchedUserList, searchMessage.RequestID)
 
-		w.logger.Info().Interface("SEARCH", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("userInfoList",len(searchedUserList)).Interface("userInfoList",searchedUserList ).Interface("searchType", searchMessage.SearchType).Msg("RECEIVE-SEARCH-MESSAGE")
+		w.logger.Info().Interface("SEARCH", message.Type).Interface("userID", w.userID).Interface("responseMessageByte", binary.Size(responseMessage)).Interface("userInfoList", len(searchedUserList)).Interface("userInfoList", searchedUserList).Interface("searchType", searchMessage.SearchType).Interface("requestID", searchMessage.RequestID).Msg("RECEIVE-SEARCH-MESSAGE")
 
 		if err != nil {
 			w.logger.Fatal().Err(err)
@@ -292,7 +293,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		}
 		w.logger.Info().Msg("send")
 		w.signalingUseCase.Send()
-
 
 		responseMessage, err := w.makeSendMessage()
 		if err != nil {
@@ -319,7 +319,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 
 		// NOTE: 相手のユーザIDを保存
 		w.destination = offerMessage.Destination
-
 
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeOfferMessage(offerMessage.SDP, w.userID)
@@ -396,7 +395,6 @@ func (w *WSConnection) handleMessage(rawMessage []byte, pongTimer *time.Timer) {
 		if err != nil {
 			w.logger.Fatal().Err(err)
 		}
-
 
 		// NOTE: ここでユーザIDを交換
 		responseMessage, err := w.makeCloseMessage(w.userID)
